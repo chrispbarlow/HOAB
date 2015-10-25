@@ -5,7 +5,6 @@
 #include <arduino.h>
 #include "servoSteps.h"
 
-#define NUM_LEGS	(6)
 
 
 
@@ -45,7 +44,7 @@ directions_t directionOffset_G;
 movement_t movement_G;
 
 volatile void servoSteps_Init(void){
-	movement_G = STOP;
+	movement_G = WALK;
 	directionOffset_G = DIR_A;
 }
 
@@ -72,8 +71,8 @@ volatile void servoSteps_update(void){
 
 			/* load sequence values into 'run' array */
 			for(step = 0; step < NUM_SEQ_STEPS; step++){
-				sequenceLegRun_G[legNum].hip[step] = sequenceLegScript[offsetLegNum].hip[step];
-				sequenceLegRun_G[legNum].knee[step] = sequenceLegScript[offsetLegNum].knee[step];
+				sequenceLegRun_G[legNum].hip[step] = (sequenceLegScript[offsetLegNum].hip[step] * 4); /* Actual transmitted values are in 1/4 microseconds */
+				sequenceLegRun_G[legNum].knee[step] = (sequenceLegScript[offsetLegNum].knee[step] * 4);
 			}
 		}
 		break;

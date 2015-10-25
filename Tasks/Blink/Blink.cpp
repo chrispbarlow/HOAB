@@ -30,7 +30,24 @@ volatile void blink_update(void){
 
 	// note, we don't use delay(), as this will block the task.
 	// A counter is used to keep track of time, to allow other tasks to run in the mean time.
-	pinState = !pinState;
+
+	if(++blinkCount == 50){
+		switch(pinState){
+		case LOW:
+			pinState = HIGH;	// set the LED on
+			break;
+
+		case HIGH:
+			pinState = LOW;		// set the LED off
+			break;
+
+		default:
+			break;
+		}
+
+		blinkCount = 0;			// reset counter
+	}
+
 	digitalWrite(13, pinState);  // Write pinState to pin
 }
 
