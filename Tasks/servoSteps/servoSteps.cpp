@@ -5,6 +5,8 @@
 #include <arduino.h>
 #include "servoSteps.h"
 
+/* in proximitySensing.c */
+extern int proxReadings_G[];
 
 
 
@@ -52,6 +54,21 @@ volatile void servoSteps_Init(void){
 volatile void servoSteps_update(void){
 	int legNum, step, offsetLegNum;
 
+//	if(proxReadings_G[1] <= 25){
+////		Serial.print("W ");
+//		movement_G = WALK;
+//		directionOffset_G = DIR_A;
+//	}
+//	else if(proxReadings_G[1] <= 40){
+////		Serial.print("S ");
+//		movement_G = STOP;
+//	}
+//	else{
+////		Serial.print("R ");
+//		movement_G = RETREAT;
+//		directionOffset_G = DIR_D;
+//	}
+
 	switch(movement_G){
 	default:
 	case STOP:
@@ -59,6 +76,7 @@ volatile void servoSteps_update(void){
 		break;
 
 	case WALK:
+	case RETREAT:
 		for(legNum = 0; legNum < NUM_LEGS; legNum++){
 
 			/* apply offset */
