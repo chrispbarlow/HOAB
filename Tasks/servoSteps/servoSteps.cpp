@@ -29,7 +29,7 @@ const legPositions_t sequenceLegScript[NUM_LEGS] =	{
 				/* Knee3- servo9 */		{2000, 2000,  992,  992, 2000, 2000}
 								},
 				/* Leg4 */		{
-				/* Hip4 - servo4 */		{2000, 2000, 2000,  992,  992,  992},
+				/* Hip4 - servo4 */		{1920, 1920, 1920,  992,  992,  992},
 				/* Knee4- servo10 */	{ 992, 2000, 2000, 2000, 2000,  992}
 								},
 				/* Leg5 */		{
@@ -54,20 +54,20 @@ volatile void servoSteps_Init(void){
 volatile void servoSteps_update(void){
 	int legNum, step, offsetLegNum;
 
-//	if(proxReadings_G[1] <= 25){
-////		Serial.print("W ");
-//		movement_G = WALK;
-//		directionOffset_G = DIR_A;
-//	}
-//	else if(proxReadings_G[1] <= 40){
-////		Serial.print("S ");
-//		movement_G = STOP;
-//	}
-//	else{
-////		Serial.print("R ");
-//		movement_G = RETREAT;
-//		directionOffset_G = DIR_D;
-//	}
+	if(proxReadings_G[1] <= 25){
+//		Serial.print("W ");
+		movement_G = WALK;
+		directionOffset_G = DIR_A;
+	}
+	else if(proxReadings_G[1] <= 40){
+//		Serial.print("S ");
+		movement_G = STOP;
+	}
+	else{
+//		Serial.print("R ");
+		movement_G = RETREAT;
+		directionOffset_G = DIR_D;
+	}
 
 	switch(movement_G){
 	default:

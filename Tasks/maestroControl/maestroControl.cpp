@@ -10,6 +10,8 @@
 #define HIP_BASE_SPEED (200)
 #define KNEE_BASE_SPEED (200)
 
+typedef enum {WAIT_FOR_STOP, SET_SPEED, SET_KNEES, SET_HIPS, NEXT_SEQUENCE_STEP} servoControlSteps_t;
+servoControlSteps_t servoControlStep;
 
 /* in servoSteps.c */
 extern legPositions_t sequenceLegRun_G[];
@@ -24,6 +26,7 @@ volatile void maestroControl_Init(void){
 	uint8_t i;
 
 	sequenceStep = 0;
+	servoControlStep = WAIT_FOR_STOP;
 
 	for(i = 0; i < (NUM_LEGS); i++){
 		Serial.write(MAESTRO_SET_SPEED);
@@ -62,26 +65,71 @@ volatile void maestroControl_update(void){
 		Serial.write((walkingSpeed >> 7) & 0x7F);
 	}
 
-	Serial.write(MAESTRO_GET_STATE);
-	if(Serial.read() == 0x00){
-		for(i = 0; i < NUM_LEGS; i++){
-			Serial.write(MAESTRO_SET_TARGET);
-			Serial.write(i);
-			Serial.write((sequenceLegRun_G[i].hip[sequenceStep] & 0x7F));
-			Serial.write((sequenceLegRun_G[i].hip[sequenceStep] >> 7) & 0x7F);
+	switch(servoControlStep){
 
-			Serial.write(MAESTRO_SET_TARGET);
-			Serial.write(i + NUM_LEGS);
-			Serial.write(sequenceLegRun_G[i].knee[sequenceStep] & 0x7F);
-			Serial.write((sequenceLegRun_G[i].knee[sequenceStep] >> 7) & 0x7F);
-		}
-//		if(movement_G != STOP){
-		sequenceStep++;
-			if(sequenceStep >= NUM_SEQ_STEPS){
+		default:
+		case WAIT_FOR_STOP:
+			Serial.write(MAESTRO_GET_STATE);
+			if(Serial.read() == 0x00){
+				servoControlStep = SET_KNEES;
+			}
+			else{
+				servoControlStep = WAIT_FOR_STOP;
+			}
+			break;
+
+		case SET_SPEED:
+			if(movement_G == RETREAT){
+				walkingSpeed = HIP_BASE_SPEED;
+			}
+			else{
+				walkingSpeed = (HIP_BASE_SPEED - (proxReadings_G[1]*2));
+				if(walkingSpeed <= 0){
+					walkingSpeed = 1;
+				}
+			}
+
+			for(i = 0; i < (NUM_LEGS); i++){
+				Serial.write(MAESTRO_SET_SPEED);
+				Serial.write(i);
+				Serial.write(walkingSpeed & 0x7F);
+				Serial.write((walkingSpeed >> 7) & 0x7F);
+			}
+
+			servoControlStep = SET_KNEES;
+			break;
+
+		case SET_KNEES:
+			for(i = 0; i < NUM_LEGS; i++){
+				Serial.write(MAESTRO_SET_TARGET);
+				Serial.write(i + NUM_LEGS);
+				Serial.write(sequenceLegRun_G[i].knee[sequenceStep] & 0x7F);
+				Serial.write((sequenceLegRun_G[i].knee[sequenceStep] >> 7) & 0x7F);
+			}
+
+			servoControlStep = SET_HIPS;
+			break;
+
+		case SET_HIPS:
+			for(i = 0; i < NUM_LEGS; i++){
+				Serial.write(MAESTRO_SET_TARGET);
+				Serial.write(i);
+				Serial.write((sequenceLegRun_G[i].hip[sequenceStep] & 0x7F));
+				Serial.write((sequenceLegRun_G[i].hip[sequenceStep] >> 7) & 0x7F);
+			}
+
+			servoControlStep = NEXT_SEQUENCE_STEP;
+			break;
+
+		case NEXT_SEQUENCE_STEP:
+			if(++sequenceStep >= NUM_SEQ_STEPS){
 				sequenceStep = 0;
 			}
-//		}
+
+			servoControlStep = WAIT_FOR_STOP;
+			break;
 	}
+
 }
 
 
