@@ -39,7 +39,7 @@ const legPositions_t sequenceLegScript[NUM_LEGS] =	{
 							};
 
 /* Array to run the sequence from */
-legPositions_t sequenceLegRun_G[NUM_LEGS];
+legPositions_t sequenceLegRun_G[NUM_LEGS][2];
 
 /* Directions */
 directions_t directionOffset_G;
@@ -53,6 +53,7 @@ volatile void servoSteps_Init(void){
 
 volatile void servoSteps_update(void){
 	int legNum, step, offsetLegNum;
+	static int sequenceNum = 0;
 
 	if(proxReadings_G[1] <= 25){
 //		Serial.print("W ");
@@ -89,10 +90,12 @@ volatile void servoSteps_update(void){
 
 			/* load sequence values into 'run' array */
 			for(step = 0; step < NUM_SEQ_STEPS; step++){
-				sequenceLegRun_G[legNum].hip[step] = (sequenceLegScript[offsetLegNum].hip[step] * 4); /* Actual transmitted values are in 1/4 microseconds */
-				sequenceLegRun_G[legNum].knee[step] = (sequenceLegScript[offsetLegNum].knee[step] * 4);
+				sequenceLegRun_G[legNum][sequenceNum].hip[step] = (sequenceLegScript[offsetLegNum].hip[step] * 4); /* Actual transmitted values are in 1/4 microseconds */
+				sequenceLegRun_G[legNum][sequenceNum].knee[step] = (sequenceLegScript[offsetLegNum].knee[step] * 4);
 			}
 		}
+
+		sequenceNum = (sequenceNum == 0) ? 1 : 0;
 		break;
 
 	case ROTATE_L:

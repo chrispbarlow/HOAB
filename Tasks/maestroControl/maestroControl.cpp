@@ -10,11 +10,11 @@
 #define HIP_BASE_SPEED (200)
 #define KNEE_BASE_SPEED (200)
 
-typedef enum {WAIT_FOR_STOP, SET_SPEED, SET_KNEES, SET_HIPS, NEXT_SEQUENCE_STEP} servoControlSteps_t;
+typedef enum {WAIT_FOR_STOP, SET_KNEES, SET_HIPS, NEXT_SEQUENCE_STEP} servoControlSteps_t;
 servoControlSteps_t servoControlStep;
 
 /* in servoSteps.c */
-extern legPositions_t sequenceLegRun_G[];
+extern legPositions_t sequenceLegRun_G[][2];
 extern movement_t movement_G;
 
 /* in proximitySensing.c */
@@ -47,6 +47,7 @@ volatile void maestroControl_Init(void){
 volatile void maestroControl_update(void){
 	uint8_t i;
 	int walkingSpeed;
+	static int runningSequenceNum = 0;
 
 	if(movement_G == RETREAT){
 		walkingSpeed = HIP_BASE_SPEED;
@@ -78,33 +79,12 @@ volatile void maestroControl_update(void){
 			}
 			break;
 
-		case SET_SPEED:
-			if(movement_G == RETREAT){
-				walkingSpeed = HIP_BASE_SPEED;
-			}
-			else{
-				walkingSpeed = (HIP_BASE_SPEED - (proxReadings_G[1]*2));
-				if(walkingSpeed <= 0){
-					walkingSpeed = 1;
-				}
-			}
-
-			for(i = 0; i < (NUM_LEGS); i++){
-				Serial.write(MAESTRO_SET_SPEED);
-				Serial.write(i);
-				Serial.write(walkingSpeed & 0x7F);
-				Serial.write((walkingSpeed >> 7) & 0x7F);
-			}
-
-			servoControlStep = SET_KNEES;
-			break;
-
 		case SET_KNEES:
 			for(i = 0; i < NUM_LEGS; i++){
 				Serial.write(MAESTRO_SET_TARGET);
 				Serial.write(i + NUM_LEGS);
-				Serial.write(sequenceLegRun_G[i].knee[sequenceStep] & 0x7F);
-				Serial.write((sequenceLegRun_G[i].knee[sequenceStep] >> 7) & 0x7F);
+				Serial.write(sequenceLegRun_G[i][runningSequenceNum].knee[sequenceStep] & 0x7F);
+				Serial.write((sequenceLegRun_G[i][runningSequenceNum].knee[sequenceStep] >> 7) & 0x7F);
 			}
 
 			servoControlStep = SET_HIPS;
@@ -114,8 +94,8 @@ volatile void maestroControl_update(void){
 			for(i = 0; i < NUM_LEGS; i++){
 				Serial.write(MAESTRO_SET_TARGET);
 				Serial.write(i);
-				Serial.write((sequenceLegRun_G[i].hip[sequenceStep] & 0x7F));
-				Serial.write((sequenceLegRun_G[i].hip[sequenceStep] >> 7) & 0x7F);
+				Serial.write((sequenceLegRun_G[i][runningSequenceNum].hip[sequenceStep] & 0x7F));
+				Serial.write((sequenceLegRun_G[i][runningSequenceNum].hip[sequenceStep] >> 7) & 0x7F);
 			}
 
 			servoControlStep = NEXT_SEQUENCE_STEP;
@@ -124,6 +104,7 @@ volatile void maestroControl_update(void){
 		case NEXT_SEQUENCE_STEP:
 			if(++sequenceStep >= NUM_SEQ_STEPS){
 				sequenceStep = 0;
+				runningSequenceNum = (runningSequenceNum == 0) ? 1 : 0;
 			}
 
 			servoControlStep = WAIT_FOR_STOP;
