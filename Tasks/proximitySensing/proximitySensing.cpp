@@ -10,7 +10,6 @@
 int proxReadings_G[3];
 
 volatile void proximitySensing_Init(void){
-//	Serial.begin(115200);
 	proxReadings_G[0] = 0;
 	proxReadings_G[1] = 0;
 	proxReadings_G[2] = 0;

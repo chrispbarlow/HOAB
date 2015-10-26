@@ -13,6 +13,34 @@ extern int runningSequenceNum_G;
 
 
 /* Array of legs containing the movement sequence (direction A) */
+const legPositions_t resetLegScript[NUM_LEGS] =	{
+				/* Leg0 */		{
+				/* Hip0 - servo0 */		{   0,    0, 1495, 1495, 1495, 1495},
+				/* Knee0- servo6 */		{2000,  992,  992, 2000, 2000, 2000}
+								},
+				/* Leg1 */		{
+				/* Hip1 - servo1 */		{   0,    0,    0,    0,    0, 1495},
+				/* Knee1- servo7 */		{2000, 2000, 2000, 2000,  992,  992}
+								},
+				/* Leg2 */		{
+				/* Hip2 - servo2 */		{   0,    0, 1495, 1495, 1495, 1495},
+				/* Knee2- servo8 */		{2000,  992,  992, 2000, 2000, 2000}
+								},
+				/* Leg3 */		{
+				/* Hip3 - servo3 */		{   0,    0,    0,    0,    0, 1495},
+				/* Knee3- servo9 */		{2000, 2000, 2000, 2000,  992,  992}
+								},
+				/* Leg4 */		{
+				/* Hip4 - servo4 */		{   0,    0, 1495, 1495, 1495, 1495},
+				/* Knee4- servo10 */	{2000,  992,  992, 2000, 2000, 2000}
+								},
+				/* Leg5 */		{
+				/* Hip5 - servo5 */		{   0,    0,    0,    0,    0, 1495},
+				/* Knee4- servo11 */	{2000, 2000, 2000, 2000,  992,  992}
+								}
+							};
+
+/* Array of legs containing the movement sequence (direction A) */
 const legPositions_t sequenceLegScript[NUM_LEGS] =	{
 				/* Leg0 */		{
 				/* Hip0 - servo0 */		{1240, 1240, 2000, 2000, 2000, 1240},
@@ -49,7 +77,7 @@ movement_t movement_G;
 
 volatile void servoSteps_Init(void){
 	movement_G = WALK;
-	directionOffset_G = DIR_A;
+	directionOffset_G = DIR_D;
 }
 
 
@@ -57,19 +85,19 @@ volatile void servoSteps_update(void){
 	int legNum, step, offsetLegNum;
 	static int nextSequenceNum = 0;
 
-	if(proxReadings_G[1] <= 25){
+	if(proxReadings_G[1] <= 50){
 //		Serial.print("W ");
 		movement_G = WALK;
-		directionOffset_G = DIR_A;
+		directionOffset_G = DIR_D;
 	}
-	else if(proxReadings_G[1] <= 40){
+	else if(proxReadings_G[1] <= 100){
 //		Serial.print("S ");
 		movement_G = STOP;
 	}
 	else{
 //		Serial.print("R ");
 		movement_G = RETREAT;
-		directionOffset_G = DIR_D;
+		directionOffset_G = DIR_A;
 	}
 
 	nextSequenceNum = ((~runningSequenceNum_G) & 1);

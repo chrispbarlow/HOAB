@@ -71,11 +71,11 @@ volatile void maestroControl_update(void){
 		default:
 		case WAIT_FOR_STOP:
 			Serial.write(MAESTRO_GET_STATE);
-			if(Serial.read() == 0x00){
-				servoControlStep = SET_KNEES;
+			if((Serial.read() != 0x00) || ((movement_G == STOP) && (sequenceStep == 0))){
+				servoControlStep = WAIT_FOR_STOP;
 			}
 			else{
-				servoControlStep = WAIT_FOR_STOP;
+				servoControlStep = SET_KNEES;
 			}
 			break;
 
