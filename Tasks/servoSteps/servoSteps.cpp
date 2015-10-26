@@ -15,58 +15,58 @@ extern int runningSequenceNum_G;
 /* Array of legs containing the movement sequence (direction A) */
 const legPositions_t resetLegScript[NUM_LEGS] =	{
 				/* Leg0 */		{
-				/* Hip0 - servo0 */		{   0,    0, 1495, 1495, 1495, 1495},
-				/* Knee0- servo6 */		{2000,  992,  992, 2000, 2000, 2000}
+				/* Hip0 - servo0 */		{   0,    0,    0,    0,    0, 1495},
+				/* Knee0- servo6 */		{2000, 2000, 2000, 2000,  992,  992}
 								},
 				/* Leg1 */		{
-				/* Hip1 - servo1 */		{   0,    0,    0,    0,    0, 1495},
-				/* Knee1- servo7 */		{2000, 2000, 2000, 2000,  992,  992}
+				/* Hip1 - servo1 */		{   0,    0, 1495, 1495, 1495, 1495},
+				/* Knee1- servo7 */		{2000,  992,  992, 2000, 2000, 2000}
 								},
 				/* Leg2 */		{
-				/* Hip2 - servo2 */		{   0,    0, 1495, 1495, 1495, 1495},
-				/* Knee2- servo8 */		{2000,  992,  992, 2000, 2000, 2000}
+				/* Hip2 - servo2 */		{   0,    0,    0,    0,    0, 1495},
+				/* Knee2- servo8 */		{2000, 2000, 2000, 2000,  992,  992}
 								},
 				/* Leg3 */		{
-				/* Hip3 - servo3 */		{   0,    0,    0,    0,    0, 1495},
-				/* Knee3- servo9 */		{2000, 2000, 2000, 2000,  992,  992}
+				/* Hip3 - servo3 */		{   0,    0, 1495, 1495, 1495, 1495},
+				/* Knee3- servo9 */		{2000,  992,  992, 2000, 2000, 2000}
 								},
 				/* Leg4 */		{
-				/* Hip4 - servo4 */		{   0,    0, 1495, 1495, 1495, 1495},
-				/* Knee4- servo10 */	{2000,  992,  992, 2000, 2000, 2000}
+				/* Hip4 - servo4 */		{   0,    0,    0,    0,    0, 1495},
+				/* Knee4- servo10 */	{2000, 2000, 2000, 2000,  992,  992}
 								},
 				/* Leg5 */		{
-				/* Hip5 - servo5 */		{   0,    0,    0,    0,    0, 1495},
-				/* Knee4- servo11 */	{2000, 2000, 2000, 2000,  992,  992}
+				/* Hip5 - servo5 */		{   0,    0, 1495, 1495, 1495, 1495},
+				/* Knee4- servo11 */	{2000,  992,  992, 2000, 2000, 2000}
 								}
 							};
 
 /* Array of legs containing the movement sequence (direction A) */
 const legPositions_t sequenceLegScript[NUM_LEGS] =	{
-				/* Leg0 */		{
-				/* Hip0 - servo0 */		{1240, 1240, 2000, 2000, 2000, 1240},
-				/* Knee0- servo6 */		{2000, 2000, 2000, 2000,  992,  992}
-								},
-				/* Leg1 */		{
-				/* Hip1 - servo1 */		{1920, 1920,  992,  992,  992, 1920},
-				/* Knee1- servo7 */		{2000,  992,  992, 2000, 2000, 2000}
-								},
-				/* Leg2 */		{
-				/* Hip2 - servo2 */		{ 992,  992, 1755, 1755, 1755,  992},
-				/* Knee2- servo8 */		{2000, 2000, 2000, 2000,  992,  992}
-								},
-				/* Leg3 */		{
-				/* Hip3 - servo3 */		{1240, 1240, 2000, 2000, 2000, 1240},
-				/* Knee3- servo9 */		{2000,  992,  992, 2000, 2000, 2000}
-								},
-				/* Leg4 */		{
-				/* Hip4 - servo4 */		{1920, 1920,  992,  992,  992, 1920},
-				/* Knee4- servo10 */	{2000, 2000, 2000, 2000,  992,  992}
-								},
-				/* Leg5 */		{
-				/* Hip5 - servo5 */		{ 992,  992, 1755, 1755, 1755,  992},
-				/* Knee4- servo11 */	{2000,  992,  992, 2000, 2000, 2000}
-								}
-							};
+ 				/* Leg0 */		{
+				/* Hip0 - servo0 */		{1240, 1240, 1240, 2000, 2000, 2000},
+				/* Knee0- servo6 */		{ 992, 2000, 2000, 2000, 2000,  992}
+ 								},
+ 				/* Leg1 */		{
+				/* Hip1 - servo1 */		{1920, 1920, 1920,  992,  992,  992},
+				/* Knee1- servo7 */		{2000, 2000,  992,  992, 2000, 2000}
+ 								},
+ 				/* Leg2 */		{
+				/* Hip2 - servo2 */		{ 992,  992,  992, 1755, 1755, 1755},
+				/* Knee2- servo8 */		{ 992, 2000, 2000, 2000, 2000,  992}
+ 								},
+ 				/* Leg3 */		{
+				/* Hip3 - servo3 */		{1255, 1255, 1255, 2000, 2000, 2000},
+				/* Knee3- servo9 */		{2000, 2000,  992,  992, 2000, 2000}
+ 								},
+ 				/* Leg4 */		{
+				/* Hip4 - servo4 */		{1920, 1920, 1920,  992,  992,  992},
+				/* Knee4- servo10 */	{ 992, 2000, 2000, 2000, 2000,  992}
+ 								},
+ 				/* Leg5 */		{
+				/* Hip5 - servo5 */		{ 992,  992,  992, 1760, 1760, 1760},
+				/* Knee4- servo11 */	{2000, 2000,  992,  992, 2000, 2000}
+ 								}
+ 							};
 
 /* Array to run the sequence from */
 legPositions_t sequenceLegRun_G[NUM_LEGS][2];
@@ -76,6 +76,15 @@ directions_t directionOffset_G;
 movement_t movement_G;
 
 volatile void servoSteps_Init(void){
+	int step, legNum;
+	/* load reset sequence values into 'run' array */
+	for(legNum = 0; legNum < NUM_LEGS; legNum++){
+		for(step = 0; step < NUM_SEQ_STEPS; step++){
+			sequenceLegRun_G[legNum][0].hip[step] = (resetLegScript[legNum].hip[step] * 4); /* Actual transmitted values are in 1/4 microseconds */
+			sequenceLegRun_G[legNum][0].knee[step] = (resetLegScript[legNum].knee[step] * 4);
+		}
+	}
+
 	movement_G = WALK;
 	directionOffset_G = DIR_D;
 }
@@ -100,7 +109,7 @@ volatile void servoSteps_update(void){
 		directionOffset_G = DIR_A;
 	}
 
-	nextSequenceNum = ((~runningSequenceNum_G) & 1);
+	nextSequenceNum = (runningSequenceNum_G == 0) ? 1 : 0;
 
 	switch(movement_G){
 	default:

@@ -20,6 +20,8 @@
  */
 #include <arduino.h>
 
+extern int runningSequenceNum_G;
+
 volatile void blink_Init(void){
 	pinMode(13, OUTPUT);
 }
@@ -31,7 +33,10 @@ volatile void blink_update(void){
 	// note, we don't use delay(), as this will block the task.
 	// A counter is used to keep track of time, to allow other tasks to run in the mean time.
 
-	if(++blinkCount == 50){
+	if(runningSequenceNum_G == 0){
+		pinState = HIGH;
+	}
+	else if(++blinkCount == 50){
 		switch(pinState){
 		case LOW:
 			pinState = HIGH;	// set the LED on

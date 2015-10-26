@@ -32,15 +32,15 @@ volatile void maestroControl_Init(void){
 	for(i = 0; i < (NUM_LEGS); i++){
 		Serial.write(MAESTRO_SET_SPEED);
 		Serial.write(i);
-		Serial.write(HIP_BASE_SPEED & 0x7F);
-		Serial.write((HIP_BASE_SPEED >> 7) & 0x7F);
+		Serial.write(50 & 0x7F);
+		Serial.write((50 >> 7) & 0x7F);
 	}
 
 	for(i = 0; i < (NUM_LEGS); i++){
 		Serial.write(MAESTRO_SET_SPEED);
 		Serial.write(i+NUM_LEGS);
-		Serial.write(KNEE_BASE_SPEED & 0x7F);
-		Serial.write((KNEE_BASE_SPEED >> 7) & 0x7F);
+		Serial.write(50 & 0x7F);
+		Serial.write((50 >> 7) & 0x7F);
 	}
 }
 
@@ -104,7 +104,7 @@ volatile void maestroControl_update(void){
 		case NEXT_SEQUENCE_STEP:
 			if(++sequenceStep >= NUM_SEQ_STEPS){
 				sequenceStep = 0;
-				runningSequenceNum_G = ((~runningSequenceNum_G) & 1);
+				runningSequenceNum_G = (runningSequenceNum_G == 0) ? 1 : 0;
 			}
 
 			servoControlStep = WAIT_FOR_STOP;
