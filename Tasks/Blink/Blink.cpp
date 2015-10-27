@@ -22,6 +22,7 @@
 #include "../servoSteps/servoSteps.h"
 
 extern movement_t movement_G;
+extern directions_t directionOffset_G;
 
 volatile void blink_Init(void){
 	pinMode(13, OUTPUT);
@@ -34,7 +35,7 @@ volatile void blink_update(void){
 	// note, we don't use delay(), as this will block the task.
 	// A counter is used to keep track of time, to allow other tasks to run in the mean time.
 
-	if(movement_G == RETREAT){
+	if(directionOffset_G == DIR_D){
 		pinState = HIGH;
 		blinkCount = 0;
 	}

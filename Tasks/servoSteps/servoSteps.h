@@ -10,6 +10,8 @@
 
 #define NUM_SEQ_STEPS 	(6)
 #define NUM_LEGS	(6)
+#define HIP_BASE_SPEED (400)
+#define KNEE_BASE_SPEED (0)
 
 /* 6-step sequences for hips and knees */
 typedef struct {
@@ -19,7 +21,7 @@ typedef struct {
 
 
 typedef enum{DIR_A = 0, DIR_B = 1, DIR_C = 2, DIR_D = 3, DIR_E  = 4, DIR_F = 5}directions_t;
-typedef enum{STOP, WALK, ROTATE_L, ROTATE_R, RETREAT, RESET}movement_t;
+typedef enum{STOP, WALK, ROTATE_L, ROTATE_R, RESET}movement_t;
 
 volatile void servoSteps_Init(void);
 volatile void servoSteps_update(void);

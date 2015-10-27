@@ -9,7 +9,7 @@
 extern volatile int proxReadings_G[];
 
 /* in maestroControl.c */
-extern volatile int usingSequence_G;
+extern volatile bool usingSequence_G;
 
 
 /* Array of legs containing the movement sequence (direction A) */
@@ -74,6 +74,8 @@ volatile legPositions_t sequenceLegRun_G[NUM_LEGS];
 /* Directions */
 directions_t directionOffset_G;
 volatile movement_t movement_G;
+int walkingSpeed_G;
+
 
 volatile void servoSteps_Init(void){
 	int step, legNum;
@@ -94,22 +96,22 @@ volatile void servoSteps_update(void){
 	int legNum, step, offsetLegNum;
 	static int nextSequenceNum = 0;
 
-//	if ((movement_G != RESET) && (usingSequence_G == false)){
-	if(proxReadings_G[1] <= 50){
-//		Serial.print("W ");
+	if(proxReadings_G[1] <= 100){
 		movement_G = WALK;
 		directionOffset_G = DIR_A;
+		walkingSpeed_G = (HIP_BASE_SPEED - (proxReadings_G[1]*(HIP_BASE_SPEED/100)));
+		if(walkingSpeed_G <= 0){
+			walkingSpeed_G = 1;
+		}
 	}
-	else if(proxReadings_G[1] <= 100){
-//		Serial.print("S ");
+	else if(proxReadings_G[1] <= 175){
 		movement_G = STOP;
 	}
 	else{
-//		Serial.print("R ");
-		movement_G = RETREAT;
+		movement_G = WALK;
 		directionOffset_G = DIR_D;
+		walkingSpeed_G = (HIP_BASE_SPEED);
 	}
-
 
 	switch(movement_G){
 	default:
@@ -119,7 +121,6 @@ volatile void servoSteps_update(void){
 		break;
 
 	case WALK:
-	case RETREAT:
 		if(usingSequence_G == false){
 			for(legNum = 0; legNum < NUM_LEGS; legNum++){
 
