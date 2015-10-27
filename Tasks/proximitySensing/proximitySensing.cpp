@@ -22,7 +22,12 @@ volatile void proximitySensing_update(void){
 
 	proxReadings_G[1] = (proxReadings_G[0] + proxReadings_G[2]) / 2;
 
-//	Serial.println(proxReadings_G[1]);
+
+	Serial.print(proxReadings_G[0]);
+	Serial.print(",");
+	Serial.print(proxReadings_G[1]);
+	Serial.print(",");
+	Serial.println(proxReadings_G[2]);
 }
 
 

@@ -19,8 +19,9 @@
  *      Author: chris.barlow
  */
 #include <arduino.h>
+#include "../servoSteps/servoSteps.h"
 
-extern int runningSequenceNum_G;
+extern movement_t movement_G;
 
 volatile void blink_Init(void){
 	pinMode(13, OUTPUT);
@@ -29,28 +30,38 @@ volatile void blink_Init(void){
 
 volatile void blink_update(void){
 	static uint16_t blinkCount = 0, pinState = LOW;
-
+	uint16_t flashRate;
 	// note, we don't use delay(), as this will block the task.
 	// A counter is used to keep track of time, to allow other tasks to run in the mean time.
 
-	if(runningSequenceNum_G == 0){
+	if(movement_G == RETREAT){
 		pinState = HIGH;
+		blinkCount = 0;
 	}
-	else if(++blinkCount == 50){
-		switch(pinState){
-		case LOW:
-			pinState = HIGH;	// set the LED on
-			break;
-
-		case HIGH:
-			pinState = LOW;		// set the LED off
-			break;
-
-		default:
-			break;
+	else {
+		if(movement_G == STOP){
+			flashRate = 10;
+		}
+		else{
+			flashRate = 50;
 		}
 
-		blinkCount = 0;			// reset counter
+		if(++blinkCount >= flashRate){
+			switch(pinState){
+			case LOW:
+				pinState = HIGH;	// set the LED on
+				break;
+
+			case HIGH:
+				pinState = LOW;		// set the LED off
+				break;
+
+			default:
+				break;
+			}
+
+			blinkCount = 0;			// reset counter
+		}
 	}
 
 	digitalWrite(13, pinState);  // Write pinState to pin

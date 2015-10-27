@@ -6,10 +6,10 @@
 #include "servoSteps.h"
 
 /* in proximitySensing.c */
-extern int proxReadings_G[];
+extern volatile int proxReadings_G[];
 
 /* in maestroControl.c */
-extern int runningSequenceNum_G;
+extern volatile int usingSequence_G;
 
 
 /* Array of legs containing the movement sequence (direction A) */
@@ -69,24 +69,24 @@ const legPositions_t sequenceLegScript[NUM_LEGS] =	{
  							};
 
 /* Array to run the sequence from */
-legPositions_t sequenceLegRun_G[NUM_LEGS][2];
+volatile legPositions_t sequenceLegRun_G[NUM_LEGS];
 
 /* Directions */
 directions_t directionOffset_G;
-movement_t movement_G;
+volatile movement_t movement_G;
 
 volatile void servoSteps_Init(void){
 	int step, legNum;
 	/* load reset sequence values into 'run' array */
-	for(legNum = 0; legNum < NUM_LEGS; legNum++){
-		for(step = 0; step < NUM_SEQ_STEPS; step++){
-			sequenceLegRun_G[legNum][0].hip[step] = (resetLegScript[legNum].hip[step] * 4); /* Actual transmitted values are in 1/4 microseconds */
-			sequenceLegRun_G[legNum][0].knee[step] = (resetLegScript[legNum].knee[step] * 4);
-		}
-	}
+//	for(legNum = 0; legNum < NUM_LEGS; legNum++){
+//		for(step = 0; step < NUM_SEQ_STEPS; step++){
+//			sequenceLegRun_G[legNum].hip[step] = (resetLegScript[legNum].hip[step] * 4); /* Actual transmitted values are in 1/4 microseconds */
+//			sequenceLegRun_G[legNum].knee[step] = (resetLegScript[legNum].knee[step] * 4);
+//		}
+//	}
 
 	movement_G = WALK;
-	directionOffset_G = DIR_D;
+	directionOffset_G = DIR_A;
 }
 
 
@@ -94,10 +94,11 @@ volatile void servoSteps_update(void){
 	int legNum, step, offsetLegNum;
 	static int nextSequenceNum = 0;
 
+//	if ((movement_G != RESET) && (usingSequence_G == false)){
 	if(proxReadings_G[1] <= 50){
 //		Serial.print("W ");
 		movement_G = WALK;
-		directionOffset_G = DIR_D;
+		directionOffset_G = DIR_A;
 	}
 	else if(proxReadings_G[1] <= 100){
 //		Serial.print("S ");
@@ -106,34 +107,37 @@ volatile void servoSteps_update(void){
 	else{
 //		Serial.print("R ");
 		movement_G = RETREAT;
-		directionOffset_G = DIR_A;
+		directionOffset_G = DIR_D;
 	}
 
-	nextSequenceNum = (runningSequenceNum_G == 0) ? 1 : 0;
 
 	switch(movement_G){
 	default:
 	case STOP:
+	case RESET:
 
 		break;
 
 	case WALK:
 	case RETREAT:
-		for(legNum = 0; legNum < NUM_LEGS; legNum++){
+		if(usingSequence_G == false){
+			for(legNum = 0; legNum < NUM_LEGS; legNum++){
 
-			/* apply offset */
-			offsetLegNum = legNum + (int)directionOffset_G;
+				/* apply offset */
+				offsetLegNum = legNum + (int)directionOffset_G;
 
-			/* wrap-around legs (hehe) */
-			if(offsetLegNum >= NUM_LEGS){
-				offsetLegNum -= NUM_LEGS;
+				/* wrap-around legs (hehe) */
+				if(offsetLegNum >= NUM_LEGS){
+					offsetLegNum -= NUM_LEGS;
+				}
+
+				/* load sequence values into 'run' array */
+				for(step = 0; step < NUM_SEQ_STEPS; step++){
+					sequenceLegRun_G[legNum].hip[step] = (sequenceLegScript[offsetLegNum].hip[step] * 4); /* Actual transmitted values are in 1/4 microseconds */
+					sequenceLegRun_G[legNum].knee[step] = (sequenceLegScript[offsetLegNum].knee[step] * 4);
+				}
 			}
-
-			/* load sequence values into 'run' array */
-			for(step = 0; step < NUM_SEQ_STEPS; step++){
-				sequenceLegRun_G[legNum][nextSequenceNum].hip[step] = (sequenceLegScript[offsetLegNum].hip[step] * 4); /* Actual transmitted values are in 1/4 microseconds */
-				sequenceLegRun_G[legNum][nextSequenceNum].knee[step] = (sequenceLegScript[offsetLegNum].knee[step] * 4);
-			}
+			usingSequence_G = true;
 		}
 
 		break;

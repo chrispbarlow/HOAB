@@ -13,8 +13,8 @@ void setup(){
 
 	TTduino_addTask(blink_Init, blink_update, 10, 0);
 	TTduino_addTask(proximitySensing_Init, proximitySensing_update, 100, 1);
-	TTduino_addTask(servoSteps_Init, servoSteps_update, 10, 2);
-	TTduino_addTask(maestroControl_Init, maestroControl_update, 10, 5);
+	TTduino_addTask(servoSteps_Init, servoSteps_update, 10, 3);
+	TTduino_addTask(maestroControl_Init, maestroControl_update, 10, 4);
 
 	TTduino_start(1000);
 }
