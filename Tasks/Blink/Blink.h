@@ -8,8 +8,8 @@
 #ifndef BLINK_H_
 #define BLINK_H_
 
-volatile void blink_Init(void);
-volatile void blink_update(void);
+void blink_Init(void);
+void blink_update(void);
 
 
 #endif /* BLINK_H_ */

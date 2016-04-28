@@ -9,14 +9,14 @@
 
 int proxReadings_G[3];
 
-volatile void proximitySensing_Init(void){
+void proximitySensing_Init(void){
 	proxReadings_G[0] = 0;
 	proxReadings_G[1] = 0;
 	proxReadings_G[2] = 0;
 }
 
 
-volatile void proximitySensing_update(void){
+void proximitySensing_update(void){
 	proxReadings_G[0] = analogRead(A0);
 	proxReadings_G[2] = analogRead(A1);
 

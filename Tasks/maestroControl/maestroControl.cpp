@@ -13,12 +13,12 @@ volatile servoControlSteps_t servoControlStep;
 volatile int sequenceStep;
 volatile bool usingSequence_G;
 
-/* in servoSteps.c */
+/* in servoSteps.cpp */
 extern legPositions_t sequenceLegRun_G[];
 extern int walkingSpeed_G;
 
 
-volatile void maestroControl_Init(void){
+void maestroControl_Init(void){
 	uint8_t i;
 	usingSequence_G = 0;
 	sequenceStep = 0;
@@ -62,7 +62,7 @@ volatile void maestroControl_Init(void){
 }
 
 
-volatile void maestroControl_update(void){
+void maestroControl_update(void){
 	static int i;
 	static int stopCheck = 0;
 

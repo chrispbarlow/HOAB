@@ -14,8 +14,8 @@
 #define MAESTRO_SET_ACCEL (0x89)
 #define MAESTRO_GET_STATE (0x93)
 
-volatile void maestroControl_Init(void);
-volatile void maestroControl_update(void);
+void maestroControl_Init(void);
+void maestroControl_update(void);
 
 
 #endif /* maestroControl_H_ */

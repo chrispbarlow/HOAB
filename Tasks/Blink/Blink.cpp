@@ -21,15 +21,16 @@
 #include <arduino.h>
 #include "../servoSteps/servoSteps.h"
 
+/* In servoSteps.cpp */
 extern movement_t movement_G;
 extern directions_t directionOffset_G;
 
-volatile void blink_Init(void){
+void blink_Init(void){
 	pinMode(13, OUTPUT);
 }
 
 
-volatile void blink_update(void){
+void blink_update(void){
 	static uint16_t blinkCount = 0, pinState = LOW;
 	uint16_t flashRate;
 	// note, we don't use delay(), as this will block the task.
