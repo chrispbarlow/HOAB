@@ -1,11 +1,11 @@
 /*
- * maestroControl.cpp
+ * maestro.cpp
  *
  *      Author: chris.barlow
  */
 #include <arduino.h>
-#include "maestroControl.h"
-#include "../servoSteps/servoSteps.h"
+#include "maestro.h"
+#include "../motionControl/motionControl.h"
 
 
 typedef enum {WAIT_FOR_STOP, SET_KNEES, SET_HIPS, NEXT_SEQUENCE_STEP} servoControlSteps_t;
@@ -13,7 +13,7 @@ volatile servoControlSteps_t servoControlStep;
 volatile int sequenceStep;
 volatile bool usingSequence_G;
 
-/* in servoSteps.cpp */
+/* in motionControl.cpp */
 extern legPositions_t sequenceLegRun_G[];
 extern int walkingSpeed_G;
 
@@ -41,7 +41,7 @@ uint8_t maestroGetState(void){
 	return state;
 }
 
-void maestroControl_Init(void){
+void maestro_Init(void){
 	uint8_t i;
 	usingSequence_G = 0;
 	sequenceStep = 0;
@@ -59,7 +59,7 @@ void maestroControl_Init(void){
 }
 
 
-void maestroControl_update(void){
+void maestro_update(void){
 	static int i;
 	static int stopCheck = 0;
 	uint8_t state;

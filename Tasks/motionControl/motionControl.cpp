@@ -1,9 +1,9 @@
 /*
- * servoSteps.cpp
+ * motionControl.cpp
  *      Author: chris.barlow
  */
 #include <arduino.h>
-#include "servoSteps.h"
+#include "motionControl.h"
 
 /* in proximitySensing.cpp */
 extern volatile int proxReadings_G[];
@@ -77,7 +77,7 @@ volatile movement_t movement_G;
 int walkingSpeed_G;
 
 
-void servoSteps_Init(void){
+void motionControl_Init(void){
 	int step, legNum;
 	/* load reset sequence values into 'run' array */
 //  for(legNum = 0; legNum < NUM_LEGS; legNum++){
@@ -92,7 +92,7 @@ void servoSteps_Init(void){
 }
 
 
-void servoSteps_update(void){
+void motionControl_update(void){
 	int legNum, step, offsetLegNum;
 	static int nextSequenceNum = 0;
 

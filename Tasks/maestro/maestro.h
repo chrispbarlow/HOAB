@@ -1,12 +1,12 @@
 /*
- * maestroControl.h
+ * maestro.h
  *
  *  Created on: 4 Apr 2014
  *      Author: chris.barlow
  */
 
-#ifndef maestroControl_H_
-#define maestroControl_H_
+#ifndef maestro_H_
+#define maestro_H_
 
 #define MAESTRO_SET_TARGET			(0x84)
 #define MAESTRO_SET_MULTI_TARGET	(0x9F)
@@ -14,8 +14,8 @@
 #define MAESTRO_SET_ACCEL			(0x89)
 #define MAESTRO_GET_STATE			(0x93)
 
-void maestroControl_Init(void);
-void maestroControl_update(void);
+void maestro_Init(void);
+void maestro_update(void);
 
 
-#endif /* maestroControl_H_ */
+#endif /* maestro_H_ */

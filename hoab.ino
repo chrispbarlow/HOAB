@@ -3,9 +3,9 @@
 
 /* Tasks are in self-contained folders for cleanliness */
 #include "Tasks/Blink/Blink.h"
-#include "Tasks/servoSteps/servoSteps.h"
+#include "Tasks/motionControl/motionControl.h"
 #include "Tasks/proximitySensing/proximitySensing.h"
-#include "Tasks/maestroControl/maestroControl.h"
+#include "Tasks/maestro/maestro.h"
 
 /* Schedule configuration and initialisation */
 void setup(){
@@ -19,11 +19,11 @@ void setup(){
   proximitySensing_Init();
 	Schedule.addTask("IR sensors", proximitySensing_update, 1, 500);
 
-  servoSteps_Init();
-	Schedule.addTask("Motion control", servoSteps_update, 3, 100);
+  motionControl_Init();
+	Schedule.addTask("Motion control", motionControl_update, 3, 100);
 
-  maestroControl_Init();
-	Schedule.addTask("Servo update", maestroControl_update, 4, 100);
+  maestro_Init();
+	Schedule.addTask("Servo update", maestro_update, 4, 100);
 
   /* 1 ms ticks */
 	Schedule.startTicks(1);

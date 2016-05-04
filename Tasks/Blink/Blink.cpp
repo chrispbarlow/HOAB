@@ -19,9 +19,9 @@
  *      Author: chris.barlow
  */
 #include <arduino.h>
-#include "../servoSteps/servoSteps.h"
+#include "../motionControl/motionControl.h"
 
-/* In servoSteps.cpp */
+/* In motionControl.cpp */
 extern movement_t movement_G;
 extern directions_t directionOffset_G;
 
