@@ -7,27 +7,29 @@
 #include <arduino.h>
 #include "proximitySensing.h"
 
-int proxReadings_G[3];
+sensorReadings_t proxReadings_G;
 
 void proximitySensing_Init(void){
-	proxReadings_G[0] = 0;
-	proxReadings_G[1] = 0;
-	proxReadings_G[2] = 0;
+	proxReadings_G.left = 0;
+	proxReadings_G.right = 0;
+	proxReadings_G.average = 0;
 }
 
 
 void proximitySensing_update(void){
-	proxReadings_G[0] = analogRead(A0);
-	proxReadings_G[2] = analogRead(A1);
+	proxReadings_G.left = analogRead(A0);
+	proxReadings_G.right = analogRead(A1);
 
-	proxReadings_G[1] = (proxReadings_G[0] + proxReadings_G[2]) / 2;
+	proxReadings_G.average = (proxReadings_G.left + proxReadings_G.right) / 2;
 
-
-	Serial.print(proxReadings_G[0]);
+#ifdef DEBUG_SENSORS
+#warning "Don't debug sensors on the live robot"
+	Serial.print(proxReadings_G.left);
 	Serial.print(",");
-	Serial.print(proxReadings_G[1]);
+	Serial.print(proxReadings_G.right);
 	Serial.print(",");
-	Serial.println(proxReadings_G[2]);
+	Serial.println(proxReadings_G.average);
+#endif
 }
 
 
