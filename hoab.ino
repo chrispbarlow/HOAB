@@ -19,11 +19,11 @@ void setup(){
   proximitySensing_Init();
 	Schedule.addTask("IR sensors", proximitySensing_update, 1, 500);
 
+  maestro_Init();
+  Schedule.addTask("Servo update", maestro_update, 4, 100);
+  
   motionControl_Init();
 	Schedule.addTask("Motion control", motionControl_update, 3, 100);
-
-  maestro_Init();
-	Schedule.addTask("Servo update", maestro_update, 4, 100);
 
   /* 1 ms ticks */
 	Schedule.startTicks(1);

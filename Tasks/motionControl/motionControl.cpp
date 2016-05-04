@@ -4,16 +4,14 @@
  */
 #include <arduino.h>
 #include "motionControl.h"
+#include "../maestro/maestro.h"
 
 /* in proximitySensing.cpp */
 extern volatile int proxReadings_G[];
 
-/* in maestroControl.cpp */
-extern volatile bool usingSequence_G;
-
 
 /* Array of legs containing the movement sequence (direction A) */
-const legPositions_t resetLegScript[NUM_LEGS] = {
+legPositions_t resetLegScript[NUM_LEGS] = {
 				/* Leg0 */      {
 				/* Hip0 - servo0 */     {   0,    0,    0,    0,    0, 1495},
 				/* Knee0- servo6 */     {2000, 2000, 2000, 2000,  992,  992}
@@ -69,23 +67,17 @@ const legPositions_t sequenceLegScript[NUM_LEGS] =  {
 							};
 
 /* Array to run the sequence from */
-volatile legPositions_t sequenceLegRun_G[NUM_LEGS];
+legPositions_t sequenceLegRun[NUM_LEGS];
 
 /* Directions */
 directions_t directionOffset_G;
 volatile movement_t movement_G;
-int walkingSpeed_G;
+int newWalkingSpeed;
 
 
 void motionControl_Init(void){
-	int step, legNum;
-	/* load reset sequence values into 'run' array */
-//  for(legNum = 0; legNum < NUM_LEGS; legNum++){
-//      for(step = 0; step < NUM_SEQ_STEPS; step++){
-//          sequenceLegRun_G[legNum].hip[step] = (resetLegScript[legNum].hip[step] * 4); /* Actual transmitted values are in 1/4 microseconds */
-//          sequenceLegRun_G[legNum].knee[step] = (resetLegScript[legNum].knee[step] * 4);
-//      }
-//  }
+	maestro_setMotion(resetLegScript, HIP_BASE_SPEED);
+	maestro_startNewSequence();
 
 	movement_G = WALK;
 	directionOffset_G = DIR_A;
@@ -94,34 +86,35 @@ void motionControl_Init(void){
 
 void motionControl_update(void){
 	int legNum, step, offsetLegNum;
-	static int nextSequenceNum = 0;
 
+	/* Simple speed control - calculate forwards speed based on proximity, stop if too close and reverse if really close */
 	if(proxReadings_G[1] <= 100){
 		movement_G = WALK;
 		directionOffset_G = DIR_A;
-		walkingSpeed_G = (HIP_BASE_SPEED - (proxReadings_G[1]*(HIP_BASE_SPEED/100)));
-		if(walkingSpeed_G <= 0){
-			walkingSpeed_G = 1;
+		newWalkingSpeed = (HIP_BASE_SPEED - (proxReadings_G[1]*(HIP_BASE_SPEED/100)));
+		if(newWalkingSpeed <= 0){
+			newWalkingSpeed = 1;
 		}
 	}
 	else if(proxReadings_G[1] <= 175){
+		newWalkingSpeed = 0;
 		movement_G = STOP;
 	}
 	else{
 		movement_G = WALK;
 		directionOffset_G = DIR_D;
-		walkingSpeed_G = (HIP_BASE_SPEED);
+		newWalkingSpeed = (HIP_BASE_SPEED);
 	}
 
 	switch(movement_G){
 	default:
 	case STOP:
 	case RESET:
-
+		/* Do nothing */
 		break;
 
 	case WALK:
-		if(usingSequence_G == false){
+		if(maestro_checkUpdateStatus() == SEQUENCE_FINISHED){
 			for(legNum = 0; legNum < NUM_LEGS; legNum++){
 
 				/* apply offset */
@@ -134,11 +127,10 @@ void motionControl_update(void){
 
 				/* load sequence values into 'run' array */
 				for(step = 0; step < NUM_SEQ_STEPS; step++){
-					sequenceLegRun_G[legNum].hip[step] = (sequenceLegScript[offsetLegNum].hip[step] * 4); /* Actual transmitted values are in 1/4 microseconds */
-					sequenceLegRun_G[legNum].knee[step] = (sequenceLegScript[offsetLegNum].knee[step] * 4);
+					sequenceLegRun[legNum].hip[step] = sequenceLegScript[offsetLegNum].hip[step];
+					sequenceLegRun[legNum].knee[step] = sequenceLegScript[offsetLegNum].knee[step];
 				}
 			}
-			usingSequence_G = true;
 		}
 
 		break;
@@ -151,6 +143,9 @@ void motionControl_update(void){
 
 		break;
 	}
+
+	maestro_setMotion(sequenceLegRun,newWalkingSpeed);
+	maestro_runSequence();
 
 }
 

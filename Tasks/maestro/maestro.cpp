@@ -7,21 +7,20 @@
 #include "maestro.h"
 #include "../motionControl/motionControl.h"
 
-
-typedef enum {WAIT_FOR_STOP, SET_KNEES, SET_HIPS, NEXT_SEQUENCE_STEP} servoControlSteps_t;
-volatile servoControlSteps_t servoControlStep;
-volatile int sequenceStep;
-volatile bool usingSequence_G;
-
-/* in motionControl.cpp */
-extern legPositions_t sequenceLegRun_G[];
-extern int walkingSpeed_G;
-
 #define HIP_SERVOS	(0)
 #define KNEE_SERVOS	(NUM_LEGS)
 
+static servoControlSteps_t maestroControlStep;
+static int sequenceStep;
 
-void maestroCommandAllLegs(uint8_t offset, uint8_t cmd, uint16_t value){
+typedef struct{
+  legPositions_t *servoSequence;
+  uint16_t walkingSpeed;
+}motionParameters_t;
+
+static motionParameters_t commandedMotion;
+
+static void maestroCommandAllLegs(uint8_t offset, uint8_t cmd, uint16_t value){
 	uint8_t i;
 	for(i = 0; i < (NUM_LEGS); i++){
 		Serial.write(cmd);
@@ -32,7 +31,7 @@ void maestroCommandAllLegs(uint8_t offset, uint8_t cmd, uint16_t value){
 	}
 }
 
-uint8_t maestroGetState(void){
+static uint8_t maestroGetState(void){
 	uint8_t state = 0xFF;
 
 	Serial.write(MAESTRO_GET_STATE);
@@ -42,12 +41,6 @@ uint8_t maestroGetState(void){
 }
 
 void maestro_Init(void){
-	uint8_t i;
-	usingSequence_G = 0;
-	sequenceStep = 0;
-	servoControlStep = WAIT_FOR_STOP;
-	usingSequence_G = false;
-
 	Serial.write(0xA1);
 	Serial.read();
 
@@ -56,50 +49,63 @@ void maestro_Init(void){
 
 	maestroCommandAllLegs(HIP_SERVOS, MAESTRO_SET_ACCEL, 50);
 	maestroCommandAllLegs(KNEE_SERVOS, MAESTRO_SET_ACCEL, 100);
+
+	maestroControlStep = SEQUENCE_FINISHED;
 }
 
 
 void maestro_update(void){
 	static int i;
-	static int stopCheck = 0;
 	uint8_t state;
 
-	switch(servoControlStep){
-
+	switch(maestroControlStep){
 		default:
-		case WAIT_FOR_STOP:
-			maestroCommandAllLegs(HIP_SERVOS, MAESTRO_SET_SPEED, walkingSpeed_G);
-
-			if((maestroGetState() == 0x00) && (usingSequence_G == true)){
-				servoControlStep = SET_KNEES;
-			}
-			else{
-				/* Either the servos are still moving or there are no new steps */
-				servoControlStep = WAIT_FOR_STOP;
-			}
-
+		case SEQUENCE_FINISHED:
+			/* Do nothing, wait for new sequence */
 			break;
 
+		case NEW_SEQUENCE_READY:
 		case SET_KNEES:
-			maestroCommandAllLegs(KNEE_SERVOS, MAESTRO_SET_TARGET, sequenceLegRun_G[i].knee[sequenceStep]);
-			servoControlStep = SET_HIPS;
+			/* Set command values are in 1/4 microseconds */
+			maestroCommandAllLegs(KNEE_SERVOS, MAESTRO_SET_TARGET, (commandedMotion.servoSequence[i].knee[sequenceStep] * 4));
+			maestroControlStep = SET_HIPS;
 			break;
 
 		case SET_HIPS:
-			maestroCommandAllLegs(HIP_SERVOS, MAESTRO_SET_TARGET, sequenceLegRun_G[i].hip[sequenceStep]);
-			servoControlStep = NEXT_SEQUENCE_STEP;
+			/* Set command values are in 1/4 microseconds */
+			maestroCommandAllLegs(HIP_SERVOS, MAESTRO_SET_TARGET, (commandedMotion.servoSequence[i].hip[sequenceStep] * 4));
+			sequenceStep++;
+			maestroControlStep = WAIT_FOR_STOP;
 			break;
 
-		case NEXT_SEQUENCE_STEP:
-			sequenceStep++;
-			if(sequenceStep >= NUM_SEQ_STEPS){
-				sequenceStep = 0;
-				usingSequence_G = false;
-			}
+		case WAIT_FOR_STOP:
+			maestroCommandAllLegs(HIP_SERVOS, MAESTRO_SET_SPEED, commandedMotion.walkingSpeed);
 
-			servoControlStep = WAIT_FOR_STOP;
+			state = maestroGetState();
+			if((sequenceStep >= NUM_SEQ_STEPS) && (state == 0x00)){
+				maestroControlStep = SEQUENCE_FINISHED;
+			}
+			else if(state == 0x00){
+				maestroControlStep = SET_KNEES;
+			}
 			break;
 	}
 }
 
+/* Helpers for external tasks */
+servoControlSteps_t maestro_checkUpdateStatus(void){
+	return maestroControlStep;
+}
+
+void maestro_runSequence(void){
+	if(maestroControlStep == SEQUENCE_FINISHED){
+		sequenceStep = 0;
+		maestroControlStep = NEW_SEQUENCE_READY;
+	}
+}
+
+void maestro_setMotion(void *sequence, uint16_t speed){
+	commandedMotion.servoSequence = (legPositions_t*)sequence;
+	commandedMotion.walkingSpeed = speed;
+}
 
