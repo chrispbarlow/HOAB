@@ -9,11 +9,6 @@
 #include "../maestro/maestro.h"
 #include "../proximitySensing/proximitySensing.h"
 
-#define OBJECT_TOO_CLOSE	(100)
-#define OBJECT_REALLY_CLOSE	(175)
-
-/* in proximitySensing.cpp */
-extern sensorReadings_t proxReadings_G;
 
 /* Array to run the sequence from */
 legPositions_t sequenceLegRun[NUM_LEGS];
@@ -32,20 +27,22 @@ void motionControl_Init(void){
 
 
 void motionControl_update(void){
-	int legNum, step, offsetLegNum;
+	int legNum, step, offsetLegNum, proximity;
 	uint16_t newWalkingSpeed;
 
+	proximity = proximity_getAverage();
+
 	/* Simple speed control - calculate forwards speed based on proximity, stop if too close and reverse if really close */
-	if(proxReadings_G.average <= OBJECT_TOO_CLOSE){
+	if(proximity <= OBJECT_TOO_CLOSE){
 		movement_G = WALK;
 		directionOffset_G = DIR_A;
-		newWalkingSpeed = (HIP_BASE_SPEED - (proxReadings_G.average*(HIP_BASE_SPEED/100)));
+		newWalkingSpeed = (HIP_BASE_SPEED - (proximity*(HIP_BASE_SPEED/100)));
 		if(newWalkingSpeed <= 0){
 			newWalkingSpeed = 1;
 		}
 		maestro_setWalkingSpeed(newWalkingSpeed);
 	}
-	else if(proxReadings_G.average <= OBJECT_REALLY_CLOSE){
+	else if(proximity <= OBJECT_REALLY_CLOSE){
 		movement_G = STOP;
 	}
 	else{
