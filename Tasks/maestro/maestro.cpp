@@ -4,14 +4,26 @@
  *      Author: chris.barlow
  */
 #include <arduino.h>
-#include "maestro.h"
+#include <Tasks.h>
 #include "../motionControl/motionControl.h"
+
+#include "maestro.h"
 
 #define HIP_SERVOS	(0)
 #define KNEE_SERVOS	(NUM_LEGS)
 
-static servoControlSteps_t maestroControlStep;
-static int sequenceStep;
+MaestroPlugin maestro;
+
+void maestro_init(void){
+	maestro.init();
+}
+
+void maestro_update(void){
+	maestro.update();
+}
+
+TaskPlugin Maestro("Servo Controller", maestro_init, maestro_update, 100);
+
 
 /* Use these values to tune the position of each joint */
 legPositions_t servoTuningValues = {
@@ -19,14 +31,8 @@ legPositions_t servoTuningValues = {
 	{0, 0, 0, 0, 0, 0}	/* Knees */
 };
 
-typedef struct{
-  legPositions_t* servoSequence;
-  uint16_t walkingSpeed;
-}motionParameters_t;
 
-static motionParameters_t commandedMotion;
-
-static void maestroCommandLeg(uint8_t servo, uint8_t cmd, uint16_t value){
+void MaestroPlugin::maestroCommandLeg(uint8_t servo, uint8_t cmd, uint16_t value){
 	Serial.write(cmd);
 	Serial.write(servo);
 	Serial.write(value & 0x7F);
@@ -34,14 +40,14 @@ static void maestroCommandLeg(uint8_t servo, uint8_t cmd, uint16_t value){
 	Serial.read();
 }
 
-static void maestroCommandAllLegs(uint8_t offset, uint8_t cmd, uint16_t value){
+void MaestroPlugin::maestroCommandAllLegs(uint8_t offset, uint8_t cmd, uint16_t value){
 	uint8_t i;
 	for(i = 0; i < NUM_LEGS; i++){
 		maestroCommandLeg(i+offset,cmd,value);
 	}
 }
 
-static uint8_t maestroGetState(void){
+uint8_t MaestroPlugin::maestroGetState(void){
 	uint8_t state = 0xFF;
 
 	Serial.write(MAESTRO_GET_STATE);
@@ -50,7 +56,7 @@ static uint8_t maestroGetState(void){
 	return state;
 }
 
-void maestro_Init(void){
+void MaestroPlugin::init(void){
 	int i;
 	Serial.write(0xA1);
 	Serial.read();
@@ -65,7 +71,7 @@ void maestro_Init(void){
 }
 
 
-void maestro_update(void){
+void MaestroPlugin::update(void){
 	int i, tunedValue;
 	uint8_t state;
 
@@ -115,11 +121,11 @@ void maestro_update(void){
 }
 
 /* Helpers for external tasks */
-servoControlSteps_t maestro_checkUpdateStatus(void){
+servoControlSteps_t MaestroPlugin::checkUpdateStatus(void){
 	return maestroControlStep;
 }
 
-void maestro_startNewSequence(void *sequence){
+void MaestroPlugin::startNewSequence(void *sequence){
 	if(maestroControlStep == SEQUENCE_FINISHED){
 		commandedMotion.servoSequence = (legPositions_t*)sequence;
 		sequenceStep = 0;
@@ -130,7 +136,7 @@ void maestro_startNewSequence(void *sequence){
 	}
 }
 
-void maestro_setWalkingSpeed(uint16_t speed){
+void MaestroPlugin::setWalkingSpeed(uint16_t speed){
 	commandedMotion.walkingSpeed = speed;
 }
 

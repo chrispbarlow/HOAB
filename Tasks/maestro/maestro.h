@@ -7,6 +7,8 @@
 
 #ifndef maestro_H_
 #define maestro_H_
+#include <Tasks.h>
+#include "../motionControl/motionControl.h"
 
 #define MAESTRO_SET_TARGET			(0x84)
 #define MAESTRO_SET_MULTI_TARGET	(0x9F)
@@ -16,11 +18,33 @@
 
 typedef enum {SEQUENCE_FINISHED, SET_KNEES, SET_HIPS, WAIT_FOR_STOP} servoControlSteps_t;
 
-void maestro_Init(void);
+void maestro_init(void);
 void maestro_update(void);
 
-servoControlSteps_t maestro_checkUpdateStatus(void);
-void maestro_startNewSequence(void *sequence);
-void maestro_setWalkingSpeed(uint16_t speed);
+class MaestroPlugin{
+public:
+	void init(void);
+	void update(void);
+	servoControlSteps_t checkUpdateStatus(void);
+	void startNewSequence(void *sequence);
+	void setWalkingSpeed(uint16_t speed);
+
+private:
+	void maestroCommandLeg(uint8_t servo, uint8_t cmd, uint16_t value);
+	void maestroCommandAllLegs(uint8_t offset, uint8_t cmd, uint16_t value);
+	uint8_t maestroGetState(void);
+
+	typedef struct{
+  		legPositions_t* servoSequence;
+  		uint16_t walkingSpeed;
+	}motionParameters_t;
+	motionParameters_t commandedMotion;
+
+	servoControlSteps_t maestroControlStep;
+	int sequenceStep;
+};
+
+extern MaestroPlugin maestro;
+extern TaskPlugin Maestro;
 
 #endif /* maestro_H_ */

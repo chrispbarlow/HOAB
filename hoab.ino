@@ -12,18 +12,21 @@ void setup(){
   Schedule.begin(4);
   
 	Serial.begin(115200);
+  Serial.println("Hello");
   
   blink_Init();
 	Schedule.addTask("blink", blink_update, 0, 10);
 
   proximitySensing_Init();
 	Schedule.addTask("IR sensors", proximitySensing_update, 1, 500);
+  Serial.print(Schedule.lastAddedTask());
 
-  maestro_Init();
-  Schedule.addTask("Servo update", maestro_update, 4, 100);
+  Schedule.addPlugin(Maestro, 4);
+  Serial.print(Schedule.lastAddedTask());
   
   motionControl_Init();
 	Schedule.addTask("Motion control", motionControl_update, 3, 100);
+  Serial.println(Schedule.lastAddedTask());
 
   /* 1 ms ticks */
 	Schedule.startTicks(1);

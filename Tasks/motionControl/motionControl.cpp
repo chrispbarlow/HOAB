@@ -22,7 +22,7 @@ void motionControl_Init(void){
 	movement_G = WALK;
 	directionOffset_G = DIR_A;
 
-	maestro_startNewSequence((void*)resetLegScript);
+	maestro.startNewSequence((void*)resetLegScript);
 }
 
 
@@ -40,7 +40,7 @@ void motionControl_update(void){
 		if(newWalkingSpeed <= 0){
 			newWalkingSpeed = 1;
 		}
-		maestro_setWalkingSpeed(newWalkingSpeed);
+		maestro.setWalkingSpeed(newWalkingSpeed);
 	}
 	else if(proximity <= OBJECT_REALLY_CLOSE){
 		movement_G = STOP;
@@ -48,10 +48,10 @@ void motionControl_update(void){
 	else{
 		movement_G = WALK;
 		directionOffset_G = DIR_D;
-		maestro_setWalkingSpeed(HIP_BASE_SPEED);
+		maestro.setWalkingSpeed(HIP_BASE_SPEED);
 	}
 
-	if(maestro_checkUpdateStatus() == SEQUENCE_FINISHED){
+	if(maestro.checkUpdateStatus() == SEQUENCE_FINISHED){
 		switch(movement_G){
 		default:
 		case STOP:
@@ -77,15 +77,15 @@ void motionControl_update(void){
 				}
 			}
 
-			maestro_startNewSequence(sequenceLegRun);
+			maestro.startNewSequence(sequenceLegRun);
 			break;
 
 		case ROTATE_L:
-			maestro_startNewSequence((void*)rotateLeftScript);
+			maestro.startNewSequence((void*)rotateLeftScript);
 			break;
 
 		case ROTATE_R:
-			maestro_startNewSequence((void*)rotateRightScript);
+			maestro.startNewSequence((void*)rotateRightScript);
 			break;
 		}
 	}
