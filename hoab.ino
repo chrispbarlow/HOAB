@@ -16,12 +16,13 @@ void setup(){
   
   blink_Init();
 	Schedule.addTask("blink", blink_update, 0, 10);
+  Serial.print(Schedule.lastAddedTask());
 
   proximitySensing_Init();
 	Schedule.addTask("IR sensors", proximitySensing_update, 1, 500);
   Serial.print(Schedule.lastAddedTask());
 
-  Schedule.addPlugin(Maestro, 4);
+  Schedule.addPlugin(maestro.pluginTask, 4);
   Serial.print(Schedule.lastAddedTask());
   
   motionControl_Init();

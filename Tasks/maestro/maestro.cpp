@@ -14,6 +14,7 @@
 
 MaestroPlugin maestro;
 
+
 void maestro_init(void){
 	maestro.init();
 }
@@ -21,9 +22,6 @@ void maestro_init(void){
 void maestro_update(void){
 	maestro.update();
 }
-
-TaskPlugin Maestro("Servo Controller", maestro_init, maestro_update, 100);
-
 
 /* Use these values to tune the position of each joint */
 legPositions_t servoTuningValues = {
@@ -74,11 +72,11 @@ void MaestroPlugin::init(void){
 void MaestroPlugin::update(void){
 	int i, tunedValue;
 	uint8_t state;
-
 	switch(maestroControlStep){
 		default:
 		case SEQUENCE_FINISHED:
 			/* Do nothing, wait for new sequence */
+	Serial.print("maestro");
 			break;
 
 		case SET_KNEES:

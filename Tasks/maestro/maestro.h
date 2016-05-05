@@ -18,9 +18,6 @@
 
 typedef enum {SEQUENCE_FINISHED, SET_KNEES, SET_HIPS, WAIT_FOR_STOP} servoControlSteps_t;
 
-void maestro_init(void);
-void maestro_update(void);
-
 class MaestroPlugin{
 public:
 	void init(void);
@@ -28,6 +25,9 @@ public:
 	servoControlSteps_t checkUpdateStatus(void);
 	void startNewSequence(void *sequence);
 	void setWalkingSpeed(uint16_t speed);
+
+	MaestroPlugin() : pluginTask("Servo Controller", (task_function_t)&MaestroPlugin::init, (task_function_t)&MaestroPlugin::update, 100){}
+	TaskPlugin pluginTask;
 
 private:
 	void maestroCommandLeg(uint8_t servo, uint8_t cmd, uint16_t value);
@@ -45,6 +45,5 @@ private:
 };
 
 extern MaestroPlugin maestro;
-extern TaskPlugin Maestro;
 
 #endif /* maestro_H_ */
