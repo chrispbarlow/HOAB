@@ -10,6 +10,8 @@
 #include <Tasks.h>
 #include "../motionControl/motionControl.h"
 
+#define NUM_SERVOS					(12)
+
 #define MAESTRO_SET_TARGET			(0x84)
 #define MAESTRO_SET_MULTI_TARGET	(0x9F)
 #define MAESTRO_SET_SPEED			(0x87)

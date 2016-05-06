@@ -17,8 +17,8 @@ legPositions_t sequenceLegRun[NUM_LEGS];
 directions_t directionOffset_G;
 volatile movement_t movement_G;
 
-uint16_t speeds[12];
-uint16_t accels[12];
+uint16_t speeds[NUM_SERVOS];
+uint16_t accels[NUM_SERVOS];
 
 
 void motionControl_Init(void){
