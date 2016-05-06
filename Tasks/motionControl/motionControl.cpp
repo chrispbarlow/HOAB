@@ -76,7 +76,7 @@ void motionControl_update(void){
 		maestro.setSpeeds(speeds);
 	}
 
-	if(maestro.checkUpdateStatus() == SEQUENCE_FINISHED){
+	if(maestro.getUpdateStatus() == SEQUENCE_FINISHED){
 		switch(movement_G){
 		default:
 		case STOP:

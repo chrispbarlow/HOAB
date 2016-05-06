@@ -29,7 +29,7 @@ class MaestroPlugin{
 public:
 	void init(void);
 	void update(void);
-	servoControlSteps_t checkUpdateStatus(void);
+	servoControlSteps_t getUpdateStatus(void);
 	void startNewSequence(int16_t *sequence, uint16_t count);
 	void setSpeeds(uint16_t speeds[]);
 	void setAccelerations(uint16_t accels[]);
@@ -40,7 +40,6 @@ private:
 	uint16_t tunedPosition(int16_t positionValue, int16_t tuningValue);
 	void maestroCommandLeg(uint8_t servo, uint8_t cmd, uint16_t value);
 	void maestroCommandAllLegs(uint8_t offset, uint8_t cmd, uint16_t value);
-	void compareSet(uint8_t cmd, uint16_t *newArray, uint16_t *oldArray, bool setflag);
 	uint8_t maestroGetState(void);
 
 	static servoControlSteps_t maestroControlStep;

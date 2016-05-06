@@ -12,6 +12,7 @@
 
 MaestroPlugin maestro;
 
+/* Private member variables */
 servoControlSteps_t MaestroPlugin::maestroControlStep;
 uint16_t MaestroPlugin::stepCount;
 uint16_t MaestroPlugin::servoSpeeds[NUM_SERVOS];
@@ -21,31 +22,7 @@ uint16_t MaestroPlugin::servoNum;
 int16_t *MaestroPlugin::servoSequence;
 int16_t *MaestroPlugin::servoTuningValues;
 
-
-void MaestroPlugin::maestroCommandLeg(uint8_t servo, uint8_t cmd, uint16_t value){
-	Serial.write(cmd);
-	Serial.write(servo);
-	Serial.write(value & 0x7F);
-	Serial.write((value >> 7) & 0x7F);
-	Serial.read();
-}
-
-void MaestroPlugin::maestroCommandAllLegs(uint8_t offset, uint8_t cmd, uint16_t value){
-	uint8_t i;
-	for(i = 0; i < NUM_LEGS; i++){
-		maestroCommandLeg(i+offset,cmd,value);
-	}
-}
-
-uint8_t MaestroPlugin::maestroGetState(void){
-	uint8_t state = 0xFF;
-
-	Serial.write(MAESTRO_GET_STATE);
-	state = Serial.read();
-
-	return state;
-}
-
+/* Public member functions */
 void MaestroPlugin::init(void){
 	int i;
 	Serial.write(0xA1);
@@ -59,31 +36,6 @@ void MaestroPlugin::init(void){
 	servoNum = 0;
 	maestroControlStep = SEQUENCE_FINISHED;
 }
-
-uint16_t MaestroPlugin::tunedPosition(int16_t positionValue, int16_t tuningValue){
-	int16_t tunedValue;
-
-	if(positionValue == 0){
-		tunedValue = 0;
-	}
-	else{
-		tunedValue = (positionValue + tuningValue);
-		tunedValue *= 4;	/* Set command values are in 1/4 microseconds */
-		if(tunedValue <= 0){
-			tunedValue = 1;
-		}
-		else if(tunedValue > MAESTRO_TWOBYTE_MAX){
-			tunedValue = MAESTRO_TWOBYTE_MAX;
-		}
-	}
-
-	return (uint16_t)tunedValue;
-}
-
-void MaestroPlugin::setServoTuning(int16_t *tuningValues){
-	servoTuningValues = tuningValues;
-}
-
 
 void MaestroPlugin::update(void){
 	int sequencePosition = 0;
@@ -126,8 +78,7 @@ void MaestroPlugin::update(void){
 	}
 }
 
-/* Helpers for external tasks */
-servoControlSteps_t MaestroPlugin::checkUpdateStatus(void){
+servoControlSteps_t MaestroPlugin::getUpdateStatus(void){
 	return maestroControlStep;
 }
 
@@ -180,4 +131,55 @@ void MaestroPlugin::setAccelerations(uint16_t accels[]){
 			servoAccels[i] = accels[i];
 		}
 	}
+}
+
+void MaestroPlugin::setServoTuning(int16_t *tuningValues){
+	servoTuningValues = tuningValues;
+}
+
+
+
+/* Private member functions */
+uint16_t MaestroPlugin::tunedPosition(int16_t positionValue, int16_t tuningValue){
+	int16_t tunedValue;
+
+	if(positionValue == 0){
+		tunedValue = 0;
+	}
+	else{
+		tunedValue = (positionValue + tuningValue);
+		tunedValue *= 4;	/* Set command values are in 1/4 microseconds */
+		if(tunedValue <= 0){
+			tunedValue = 1;
+		}
+		else if(tunedValue > MAESTRO_TWOBYTE_MAX){
+			tunedValue = MAESTRO_TWOBYTE_MAX;
+		}
+	}
+
+	return (uint16_t)tunedValue;
+}
+
+void MaestroPlugin::maestroCommandLeg(uint8_t servo, uint8_t cmd, uint16_t value){
+	Serial.write(cmd);
+	Serial.write(servo);
+	Serial.write(value & 0x7F);
+	Serial.write((value >> 7) & 0x7F);
+	Serial.read();
+}
+
+void MaestroPlugin::maestroCommandAllLegs(uint8_t offset, uint8_t cmd, uint16_t value){
+	uint8_t i;
+	for(i = 0; i < NUM_LEGS; i++){
+		maestroCommandLeg(i+offset,cmd,value);
+	}
+}
+
+uint8_t MaestroPlugin::maestroGetState(void){
+	uint8_t state = 0xFF;
+
+	Serial.write(MAESTRO_GET_STATE);
+	state = Serial.read();
+
+	return state;
 }
