@@ -37,47 +37,6 @@ void MaestroPlugin::init(void){
 	maestroControlStep = SEQUENCE_FINISHED;
 }
 
-void MaestroPlugin::update(void){
-	int sequencePosition = 0;
-	uint8_t state;
-
-	switch(maestroControlStep){
-		default:
-		case SEQUENCE_FINISHED:
-			/* Do nothing, wait for new sequence */
-			break;
-
-		case SENDING_SEQUENCE:
-			sequencePosition = servoNum + (sequenceStep*NUM_SERVOS);
-			maestroCommandLeg(servoNum, MAESTRO_SET_TARGET, tunedPosition(servoSequence[sequencePosition],servoTuningValues[servoNum]));
-
-			if(++servoNum >= NUM_SERVOS){
-				maestroControlStep = WAIT_FOR_STOP;
-				servoNum = 0;
-			}
-			break;
-
-		case WAIT_FOR_STOP:
-
-#ifdef PRETEND_TO_BE_STOPPED
-#warning "test mode won't wait for servos to stop"
-			state = 0;
-#else
-			state = maestroGetState();
-#endif
-
-			if((state == 0x00) && (++sequenceStep >= stepCount)){
-				sequenceStep = 0;
-				maestroControlStep = SEQUENCE_FINISHED;
-			}
-			else if(state == 0x00){
-				maestroControlStep = SENDING_SEQUENCE;
-			}
-
-			break;
-	}
-}
-
 servoControlSteps_t MaestroPlugin::getUpdateStatus(void){
 	return maestroControlStep;
 }
@@ -182,4 +141,45 @@ uint8_t MaestroPlugin::maestroGetState(void){
 	state = Serial.read();
 
 	return state;
+}
+
+void MaestroPlugin::pluginUpdate(void){
+	int sequencePosition = 0;
+	uint8_t state;
+
+	switch(maestroControlStep){
+		default:
+		case SEQUENCE_FINISHED:
+			/* Do nothing, wait for new sequence */
+			break;
+
+		case SENDING_SEQUENCE:
+			sequencePosition = servoNum + (sequenceStep*NUM_SERVOS);
+			maestroCommandLeg(servoNum, MAESTRO_SET_TARGET, tunedPosition(servoSequence[sequencePosition],servoTuningValues[servoNum]));
+
+			if(++servoNum >= NUM_SERVOS){
+				maestroControlStep = WAIT_FOR_STOP;
+				servoNum = 0;
+			}
+			break;
+
+		case WAIT_FOR_STOP:
+
+#ifdef PRETEND_TO_BE_STOPPED
+#warning "test mode won't wait for servos to stop"
+			state = 0;
+#else
+			state = maestroGetState();
+#endif
+
+			if((state == 0x00) && (++sequenceStep >= stepCount)){
+				sequenceStep = 0;
+				maestroControlStep = SEQUENCE_FINISHED;
+			}
+			else if(state == 0x00){
+				maestroControlStep = SENDING_SEQUENCE;
+			}
+
+			break;
+	}
 }

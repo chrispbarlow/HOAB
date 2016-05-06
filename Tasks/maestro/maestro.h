@@ -21,26 +21,26 @@
 /* 1 bit of every byte is lost because the msb is always left clear */
 #define MAESTRO_TWOBYTE_MAX			(0x3FFF)
 
-#define PRETEND_TO_BE_STOPPED
+// #define PRETEND_TO_BE_STOPPED
 
 typedef enum {SEQUENCE_FINISHED=0x0A, SENDING_SEQUENCE=0x0B, WAIT_FOR_STOP=0x0C} servoControlSteps_t;
 
 class MaestroPlugin{
 public:
 	void init(void);
-	void update(void);
 	servoControlSteps_t getUpdateStatus(void);
 	void startNewSequence(int16_t *sequence, uint16_t count);
 	void setSpeeds(uint16_t speeds[]);
 	void setAccelerations(uint16_t accels[]);
 	void setServoTuning(int16_t *tuningValues);
-	MaestroPlugin() : pluginTask("Servo Controller", (task_function_t)&MaestroPlugin::update){}
+	MaestroPlugin() : pluginTask("Servo Controller", (task_function_t)&MaestroPlugin::pluginUpdate){}
 	TaskPlugin pluginTask;
 private:
 	uint16_t tunedPosition(int16_t positionValue, int16_t tuningValue);
 	void maestroCommandLeg(uint8_t servo, uint8_t cmd, uint16_t value);
 	void maestroCommandAllLegs(uint8_t offset, uint8_t cmd, uint16_t value);
 	uint8_t maestroGetState(void);
+	void pluginUpdate(void);
 
 	static servoControlSteps_t maestroControlStep;
 	static uint16_t stepCount;
