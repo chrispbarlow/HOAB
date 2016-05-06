@@ -14,18 +14,12 @@ MaestroPlugin maestro;
 
 servoControlSteps_t MaestroPlugin::maestroControlStep;
 uint16_t MaestroPlugin::stepCount;
-uint16_t *MaestroPlugin::servoSequence;
 uint16_t MaestroPlugin::servoSpeeds[NUM_SERVOS];
 uint16_t MaestroPlugin::servoAccels[NUM_SERVOS];
 uint16_t MaestroPlugin::sequenceStep;
 uint16_t MaestroPlugin::servoNum;
-
-
-/* Use these values to tune the position of each joint TODO: open this up to the plugin API */
-legPositions_t servoTuningValues = {
-	{0, 0, 0, 0, 0, 0},	/* Hips */
-	{0, 0, 0, 0, 0, 0}	/* Knees */
-};
+int16_t *MaestroPlugin::servoSequence;
+int16_t *MaestroPlugin::servoTuningValues;
 
 
 void MaestroPlugin::maestroCommandLeg(uint8_t servo, uint8_t cmd, uint16_t value){
@@ -53,18 +47,46 @@ uint8_t MaestroPlugin::maestroGetState(void){
 }
 
 void MaestroPlugin::init(void){
+	int i;
 	Serial.write(0xA1);
 	Serial.read();
 
+	for(i = 0; i < NUM_SERVOS; i++){
+		servoSpeeds[i] = 0;
+		servoAccels[i] = 0;
+	}
 	sequenceStep = 0;
 	servoNum = 0;
 	maestroControlStep = SEQUENCE_FINISHED;
 }
 
+uint16_t MaestroPlugin::tunedPosition(int16_t positionValue, int16_t tuningValue){
+	int16_t tunedValue;
+
+	if(positionValue == 0){
+		tunedValue = 0;
+	}
+	else{
+		tunedValue = (positionValue + tuningValue);
+		tunedValue *= 4;	/* Set command values are in 1/4 microseconds */
+		if(tunedValue <= 0){
+			tunedValue = 1;
+		}
+		else if(tunedValue > MAESTRO_TWOBYTE_MAX){
+			tunedValue = MAESTRO_TWOBYTE_MAX;
+		}
+	}
+
+	return (uint16_t)tunedValue;
+}
+
+void MaestroPlugin::setServoTuning(int16_t *tuningValues){
+	servoTuningValues = tuningValues;
+}
+
 
 void MaestroPlugin::update(void){
-	int i = 0;
-	int tunedValue;
+	int sequencePosition = 0;
 	uint8_t state;
 
 	switch(maestroControlStep){
@@ -74,13 +96,8 @@ void MaestroPlugin::update(void){
 			break;
 
 		case SENDING_SEQUENCE:
-			/* Set command values are in 1/4 microseconds */
-			i = servoNum + (sequenceStep*NUM_SERVOS);
-			tunedValue = ((servoSequence[i] * 4) + servoTuningValues.knee[servoNum]);
-			if(tunedValue < 0){
-				tunedValue = 0;
-			}
-			maestroCommandLeg(servoNum, MAESTRO_SET_TARGET, (uint16_t)tunedValue);
+			sequencePosition = servoNum + (sequenceStep*NUM_SERVOS);
+			maestroCommandLeg(servoNum, MAESTRO_SET_TARGET, tunedPosition(servoSequence[sequencePosition],servoTuningValues[servoNum]));
 
 			if(++servoNum >= NUM_SERVOS){
 				maestroControlStep = WAIT_FOR_STOP;
@@ -114,7 +131,7 @@ servoControlSteps_t MaestroPlugin::checkUpdateStatus(void){
 	return maestroControlStep;
 }
 
-void MaestroPlugin::startNewSequence(uint16_t *sequence, uint16_t count){
+void MaestroPlugin::startNewSequence(int16_t *sequence, uint16_t count){
 	if(maestroControlStep == SEQUENCE_FINISHED){
 		servoSequence = sequence;
 		stepCount = count;

@@ -19,7 +19,7 @@ volatile movement_t movement_G;
 
 uint16_t speeds[NUM_SERVOS];
 uint16_t accels[NUM_SERVOS];
-
+int16_t servoTuning[NUM_SERVOS] = {0,2,-2,5,-5,0,0,2,-2,5,-5,0};
 
 void motionControl_Init(void){
 	int i;
@@ -37,7 +37,8 @@ void motionControl_Init(void){
 
 	maestro.setSpeeds(speeds);
 	maestro.setAccelerations(accels);
-	maestro.startNewSequence((uint16_t*)resetLegScript, NUM_SEQ_STEPS);
+	maestro.setServoTuning(servoTuning);
+	maestro.startNewSequence((int16_t*)resetLegScript, NUM_SEQ_STEPS);
 }
 
 
@@ -101,15 +102,15 @@ void motionControl_update(void){
 				}
 			}
 
-			maestro.startNewSequence((uint16_t*)sequenceLegRun, NUM_SEQ_STEPS);
+			maestro.startNewSequence((int16_t*)sequenceLegRun, NUM_SEQ_STEPS);
 			break;
 
 		case ROTATE_L:
-			maestro.startNewSequence((uint16_t*)rotateLeftScript, NUM_SEQ_STEPS);
+			maestro.startNewSequence((int16_t*)rotateLeftScript, NUM_SEQ_STEPS);
 			break;
 
 		case ROTATE_R:
-			maestro.startNewSequence((uint16_t*)rotateRightScript, NUM_SEQ_STEPS);
+			maestro.startNewSequence((int16_t*)rotateRightScript, NUM_SEQ_STEPS);
 			break;
 		}
 	}

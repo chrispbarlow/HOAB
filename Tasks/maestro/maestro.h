@@ -18,6 +18,9 @@
 #define MAESTRO_SET_ACCEL			(0x89)
 #define MAESTRO_GET_STATE			(0x93)
 
+/* 1 bit of every byte is lost because the msb is always left clear */
+#define MAESTRO_TWOBYTE_MAX			(0x3FFF)
+
 #define PRETEND_TO_BE_STOPPED
 
 typedef enum {SEQUENCE_FINISHED=0x0A, SENDING_SEQUENCE=0x0B, WAIT_FOR_STOP=0x0C} servoControlSteps_t;
@@ -27,12 +30,14 @@ public:
 	void init(void);
 	void update(void);
 	servoControlSteps_t checkUpdateStatus(void);
-	void startNewSequence(uint16_t *sequence, uint16_t count);
+	void startNewSequence(int16_t *sequence, uint16_t count);
 	void setSpeeds(uint16_t speeds[]);
 	void setAccelerations(uint16_t accels[]);
+	void setServoTuning(int16_t *tuningValues);
 	MaestroPlugin() : pluginTask("Servo Controller", (task_function_t)&MaestroPlugin::update){}
 	TaskPlugin pluginTask;
 private:
+	uint16_t tunedPosition(int16_t positionValue, int16_t tuningValue);
 	void maestroCommandLeg(uint8_t servo, uint8_t cmd, uint16_t value);
 	void maestroCommandAllLegs(uint8_t offset, uint8_t cmd, uint16_t value);
 	void compareSet(uint8_t cmd, uint16_t *newArray, uint16_t *oldArray, bool setflag);
@@ -40,11 +45,12 @@ private:
 
 	static servoControlSteps_t maestroControlStep;
 	static uint16_t stepCount;
-	static uint16_t *servoSequence;
-	static uint16_t servoSpeeds[12];
-	static uint16_t servoAccels[12];
+	static uint16_t servoSpeeds[];
+	static uint16_t servoAccels[];
 	static uint16_t sequenceStep;
 	static uint16_t servoNum;
+	static int16_t *servoSequence;
+	static int16_t *servoTuningValues;
 };
 
 extern MaestroPlugin maestro;

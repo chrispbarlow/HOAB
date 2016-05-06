@@ -21,8 +21,8 @@
 
 /* 6-step sequences for hips and knees */
 typedef struct {
-	uint16_t hip[NUM_LEGS];
-	uint16_t knee[NUM_LEGS];
+	int16_t hip[NUM_LEGS];
+	int16_t knee[NUM_LEGS];
 } legPositions_t;
 
 typedef enum{DIR_A = 0, DIR_B = 1, DIR_C = 2, DIR_D = 3, DIR_E  = 4, DIR_F = 5}directions_t;
