@@ -16,32 +16,33 @@
 #define MAESTRO_SET_ACCEL			(0x89)
 #define MAESTRO_GET_STATE			(0x93)
 
-typedef enum {SEQUENCE_FINISHED, SET_KNEES, SET_HIPS, WAIT_FOR_STOP} servoControlSteps_t;
+#define PRETEND_TO_BE_STOPPED
+
+typedef enum {SEQUENCE_FINISHED=0x0A, SENDING_SEQUENCE=0x0B, WAIT_FOR_STOP=0x0C} servoControlSteps_t;
 
 class MaestroPlugin{
 public:
 	void init(void);
 	void update(void);
 	servoControlSteps_t checkUpdateStatus(void);
-	void startNewSequence(void *sequence);
-	void setWalkingSpeed(uint16_t speed);
-
-	MaestroPlugin() : pluginTask("Servo Controller", (task_function_t)&MaestroPlugin::init, (task_function_t)&MaestroPlugin::update, 100){}
+	void startNewSequence(uint16_t *sequence, uint16_t count);
+	void setSpeeds(uint16_t speeds[]);
+	void setAccelerations(uint16_t accels[]);
+	MaestroPlugin() : pluginTask("Servo Controller", (task_function_t)&MaestroPlugin::update){}
 	TaskPlugin pluginTask;
-
 private:
 	void maestroCommandLeg(uint8_t servo, uint8_t cmd, uint16_t value);
 	void maestroCommandAllLegs(uint8_t offset, uint8_t cmd, uint16_t value);
+	void compareSet(uint8_t cmd, uint16_t *newArray, uint16_t *oldArray, bool setflag);
 	uint8_t maestroGetState(void);
 
-	typedef struct{
-  		legPositions_t* servoSequence;
-  		uint16_t walkingSpeed;
-	}motionParameters_t;
-	motionParameters_t commandedMotion;
-
-	servoControlSteps_t maestroControlStep;
-	int sequenceStep;
+	static servoControlSteps_t maestroControlStep;
+	static uint16_t stepCount;
+	static uint16_t *servoSequence;
+	static uint16_t servoSpeeds[12];
+	static uint16_t servoAccels[12];
+	static uint16_t sequenceStep;
+	static uint16_t servoNum;
 };
 
 extern MaestroPlugin maestro;

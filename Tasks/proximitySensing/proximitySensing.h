@@ -9,7 +9,7 @@
 
 #define OBJECT_TOO_CLOSE	(100)
 #define OBJECT_REALLY_CLOSE	(175)
-// #define DEBUG_SENSORS
+#define DEBUG_SENSORS
 
 
 void proximitySensing_Init(void);

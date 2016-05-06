@@ -17,17 +17,32 @@ legPositions_t sequenceLegRun[NUM_LEGS];
 directions_t directionOffset_G;
 volatile movement_t movement_G;
 
+uint16_t speeds[12];
+uint16_t accels[12];
+
 
 void motionControl_Init(void){
+	int i;
 	movement_G = WALK;
 	directionOffset_G = DIR_A;
 
-	maestro.startNewSequence((void*)resetLegScript);
+	maestro.init();
+
+	for(i = 0; i < NUM_LEGS; i++){
+		speeds[HIP_SERVOS+i] = HIP_BASE_SPEED;
+		accels[HIP_SERVOS+i] = HIP_ACCELERATION;
+		speeds[KNEE_SERVOS+i] = KNEE_BASE_SPEED;
+		accels[KNEE_SERVOS+i] = KNEE_ACCELERATION;
+	}
+
+	maestro.setSpeeds(speeds);
+	maestro.setAccelerations(accels);
+	maestro.startNewSequence((uint16_t*)resetLegScript, NUM_SEQ_STEPS);
 }
 
 
 void motionControl_update(void){
-	int legNum, step, offsetLegNum, proximity;
+	int legNum, step, offsetLegNum, proximity, i;
 	uint16_t newWalkingSpeed;
 
 	proximity = proximity_getAverage();
@@ -40,7 +55,11 @@ void motionControl_update(void){
 		if(newWalkingSpeed <= 0){
 			newWalkingSpeed = 1;
 		}
-		maestro.setWalkingSpeed(newWalkingSpeed);
+
+		for(i = 0; i < 6; i++){
+			speeds[i] = newWalkingSpeed;
+		}
+		maestro.setSpeeds(speeds);
 	}
 	else if(proximity <= OBJECT_REALLY_CLOSE){
 		movement_G = STOP;
@@ -48,7 +67,12 @@ void motionControl_update(void){
 	else{
 		movement_G = WALK;
 		directionOffset_G = DIR_D;
-		maestro.setWalkingSpeed(HIP_BASE_SPEED);
+
+		for(i = 0; i < 6; i++){
+			speeds[i] = HIP_BASE_SPEED;
+		}
+
+		maestro.setSpeeds(speeds);
 	}
 
 	if(maestro.checkUpdateStatus() == SEQUENCE_FINISHED){
@@ -77,15 +101,15 @@ void motionControl_update(void){
 				}
 			}
 
-			maestro.startNewSequence(sequenceLegRun);
+			maestro.startNewSequence((uint16_t*)sequenceLegRun, NUM_SEQ_STEPS);
 			break;
 
 		case ROTATE_L:
-			maestro.startNewSequence((void*)rotateLeftScript);
+			maestro.startNewSequence((uint16_t*)rotateLeftScript, NUM_SEQ_STEPS);
 			break;
 
 		case ROTATE_R:
-			maestro.startNewSequence((void*)rotateRightScript);
+			maestro.startNewSequence((uint16_t*)rotateRightScript, NUM_SEQ_STEPS);
 			break;
 		}
 	}

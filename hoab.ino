@@ -22,10 +22,10 @@ void setup(){
 	Schedule.addTask("IR sensors", proximitySensing_update, 1, 500);
   Serial.print(Schedule.lastAddedTask());
 
-  Schedule.addPlugin(maestro.pluginTask, 4);
-  Serial.print(Schedule.lastAddedTask());
   
   motionControl_Init();
+  Schedule.addPlugin(maestro.pluginTask, 4, 10); 
+  Serial.print(Schedule.lastAddedTask());
 	Schedule.addTask("Motion control", motionControl_update, 3, 100);
   Serial.println(Schedule.lastAddedTask());
 

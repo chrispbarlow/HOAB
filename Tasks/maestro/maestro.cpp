@@ -9,21 +9,19 @@
 
 #include "maestro.h"
 
-#define HIP_SERVOS	(0)
-#define KNEE_SERVOS	(NUM_LEGS)
 
 MaestroPlugin maestro;
 
+servoControlSteps_t MaestroPlugin::maestroControlStep;
+uint16_t MaestroPlugin::stepCount;
+uint16_t *MaestroPlugin::servoSequence;
+uint16_t MaestroPlugin::servoSpeeds[12];
+uint16_t MaestroPlugin::servoAccels[12];
+uint16_t MaestroPlugin::sequenceStep;
+uint16_t MaestroPlugin::servoNum;
 
-void maestro_init(void){
-	maestro.init();
-}
 
-void maestro_update(void){
-	maestro.update();
-}
-
-/* Use these values to tune the position of each joint */
+/* Use these values to tune the position of each joint TODO: open this up to the plugin API */
 legPositions_t servoTuningValues = {
 	{0, 0, 0, 0, 0, 0},	/* Hips */
 	{0, 0, 0, 0, 0, 0}	/* Knees */
@@ -55,65 +53,70 @@ uint8_t MaestroPlugin::maestroGetState(void){
 }
 
 void MaestroPlugin::init(void){
-	int i;
 	Serial.write(0xA1);
 	Serial.read();
 
-	maestroCommandAllLegs(HIP_SERVOS, MAESTRO_SET_SPEED, HIP_BASE_SPEED);
-	maestroCommandAllLegs(KNEE_SERVOS, MAESTRO_SET_SPEED, KNEE_BASE_SPEED);
-
-	maestroCommandAllLegs(HIP_SERVOS, MAESTRO_SET_ACCEL, 50);
-	maestroCommandAllLegs(KNEE_SERVOS, MAESTRO_SET_ACCEL, 100);
-
+	sequenceStep = 0;
+	servoNum = 0;
 	maestroControlStep = SEQUENCE_FINISHED;
 }
 
 
 void MaestroPlugin::update(void){
-	int i, tunedValue;
+	int i = 0;
+	int tunedValue;
 	uint8_t state;
+
 	switch(maestroControlStep){
 		default:
 		case SEQUENCE_FINISHED:
 			/* Do nothing, wait for new sequence */
-	Serial.print("maestro");
 			break;
 
-		case SET_KNEES:
+		case SENDING_SEQUENCE:
 			/* Set command values are in 1/4 microseconds */
-			for(i = 0; i < NUM_LEGS; i++){
-				tunedValue = ((commandedMotion.servoSequence[sequenceStep].knee[i] * 4) + servoTuningValues.knee[i]);
-				if(tunedValue < 0){
-					tunedValue = 0;
-				}
-				maestroCommandLeg((KNEE_SERVOS+i), MAESTRO_SET_TARGET, (uint16_t)tunedValue);
+			i = servoNum + (sequenceStep*12);
+			tunedValue = ((servoSequence[i] * 4) + servoTuningValues.knee[servoNum]);
+			if(tunedValue < 0){
+				tunedValue = 0;
 			}
-			maestroControlStep = SET_HIPS;
-			break;
+			maestroCommandLeg(servoNum, MAESTRO_SET_TARGET, (uint16_t)tunedValue);
 
-		case SET_HIPS:
-			/* Set command values are in 1/4 microseconds */
-			for(i = 0; i < NUM_LEGS; i++){
-				tunedValue = ((commandedMotion.servoSequence[sequenceStep].hip[i] * 4) + servoTuningValues.hip[i]);
-				if(tunedValue < 0){
-					tunedValue = 0;
-				}
-				maestroCommandLeg((HIP_SERVOS+i), MAESTRO_SET_TARGET, (uint16_t)tunedValue);
+			if(++servoNum >= 12){
+				maestroControlStep = WAIT_FOR_STOP;
+				servoNum = 0;
 			}
-			maestroControlStep = WAIT_FOR_STOP;
 			break;
 
 		case WAIT_FOR_STOP:
-			maestroCommandAllLegs(HIP_SERVOS, MAESTRO_SET_SPEED, commandedMotion.walkingSpeed);
-
+			// Serial.write('~');
+			// Serial.write(maestroControlStep);
+			// Serial.write('~');
+#ifdef PRETEND_TO_BE_STOPPED
+#warning "test mode won't wait for servos to stop"
+			state = 0;
+#else
 			state = maestroGetState();
-			if((sequenceStep >= (NUM_SEQ_STEPS-1)) && (state == 0x00)){
+#endif
+			// Serial.print("State = ");
+			// Serial.println(state);
+
+			if((state == 0x00) && (++sequenceStep >= stepCount)){
+				sequenceStep = 0;
 				maestroControlStep = SEQUENCE_FINISHED;
 			}
 			else if(state == 0x00){
-				sequenceStep++;
-				maestroControlStep = SET_KNEES;
+				maestroControlStep = SENDING_SEQUENCE;
 			}
+
+			// Serial.write('~');
+			// Serial.write(sequenceStep);
+			// Serial.write('~');
+			// Serial.write(stepCount);
+			// Serial.write('~');
+			// Serial.write(maestroControlStep);
+			// Serial.write('~');
+
 			break;
 	}
 }
@@ -123,18 +126,56 @@ servoControlSteps_t MaestroPlugin::checkUpdateStatus(void){
 	return maestroControlStep;
 }
 
-void MaestroPlugin::startNewSequence(void *sequence){
+void MaestroPlugin::startNewSequence(uint16_t *sequence, uint16_t count){
 	if(maestroControlStep == SEQUENCE_FINISHED){
-		commandedMotion.servoSequence = (legPositions_t*)sequence;
+		servoSequence = sequence;
+		stepCount = count;
+		// Serial.write('{');
+		// Serial.write(stepCount);
+		// Serial.write('}');
+
 		sequenceStep = 0;
-		maestroControlStep = SET_KNEES;
+		maestroControlStep = SENDING_SEQUENCE;
 	}
 	else{
 		/* TODO: sequence queueing? */
 	}
 }
 
-void MaestroPlugin::setWalkingSpeed(uint16_t speed){
-	commandedMotion.walkingSpeed = speed;
+void MaestroPlugin::setSpeeds(uint16_t speeds[]){
+	static bool speedSet = false;
+	int i;
+
+	if(speedSet == false){
+		for(i = 0; i < 12; i++){
+			servoSpeeds[i] = 0xFFFF;
+		}
+		speedSet = true;
+	}
+
+	for(i = 0; i < 12; i++){
+		if(speeds[i] != servoSpeeds[i]){
+			maestroCommandLeg(i, MAESTRO_SET_SPEED, speeds[i]);
+			servoSpeeds[i] = speeds[i];
+		}
+	}
 }
 
+void MaestroPlugin::setAccelerations(uint16_t accels[]){
+	static bool accelSet = false;
+	int i;
+
+	if(accelSet == false){
+		for(i = 0; i < 12; i++){
+			servoAccels[i] = 0xFFFF;
+		}
+		accelSet = true;
+	}
+
+	for(i = 0; i < 12; i++){
+		if(accels[i] != servoAccels[i]){
+			maestroCommandLeg(i, MAESTRO_SET_ACCEL, accels[i]);
+			servoAccels[i] = accels[i];
+		}
+	}
+}
