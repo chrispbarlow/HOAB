@@ -24,7 +24,7 @@ void setup(){
 
   
   motionControl_Init();
-  Schedule.addPlugin(maestro.pluginTask, 4, 10); 
+  Schedule.enablePlugin(maestro.pluginTask, 4, 10); 
   Serial.print(Schedule.lastAddedTask());
 	Schedule.addTask("Motion control", motionControl_update, 3, 100);
   Serial.println(Schedule.lastAddedTask());

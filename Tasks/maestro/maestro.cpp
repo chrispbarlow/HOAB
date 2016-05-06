@@ -5,8 +5,6 @@
  */
 #include <arduino.h>
 #include <Tasks.h>
-#include "../motionControl/motionControl.h"
-
 #include "maestro.h"
 
 

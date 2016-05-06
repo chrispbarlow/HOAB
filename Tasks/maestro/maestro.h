@@ -27,14 +27,15 @@ typedef enum {SEQUENCE_FINISHED=0x0A, SENDING_SEQUENCE=0x0B, WAIT_FOR_STOP=0x0C}
 
 class MaestroPlugin{
 public:
+	MaestroPlugin() : pluginTask("Servo Controller", (task_function_t)&MaestroPlugin::pluginUpdate){}
+	TaskPlugin pluginTask;
+
 	void init(void);
 	servoControlSteps_t getUpdateStatus(void);
 	void startNewSequence(int16_t *sequence, uint16_t count);
 	void setSpeeds(uint16_t speeds[]);
 	void setAccelerations(uint16_t accels[]);
 	void setServoTuning(int16_t *tuningValues);
-	MaestroPlugin() : pluginTask("Servo Controller", (task_function_t)&MaestroPlugin::pluginUpdate){}
-	TaskPlugin pluginTask;
 private:
 	uint16_t tunedPosition(int16_t positionValue, int16_t tuningValue);
 	void maestroCommandLeg(uint8_t servo, uint8_t cmd, uint16_t value);
