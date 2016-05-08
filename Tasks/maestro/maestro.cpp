@@ -65,7 +65,7 @@ void MaestroPlugin::setSpeeds(uint16_t speeds[]){
 
 	for(i = 0; i < NUM_SERVOS; i++){
 		if(speeds[i] != servoSpeeds[i]){
-			maestroCommandLeg(i, MAESTRO_SET_SPEED, speeds[i]);
+			maestroCommandServo(i, MAESTRO_SET_SPEED, speeds[i]);
 			servoSpeeds[i] = speeds[i];
 		}
 	}
@@ -84,7 +84,7 @@ void MaestroPlugin::setAccelerations(uint16_t accels[]){
 
 	for(i = 0; i < NUM_SERVOS; i++){
 		if(accels[i] != servoAccels[i]){
-			maestroCommandLeg(i, MAESTRO_SET_ACCEL, accels[i]);
+			maestroCommandServo(i, MAESTRO_SET_ACCEL, accels[i]);
 			servoAccels[i] = accels[i];
 		}
 	}
@@ -117,19 +117,12 @@ uint16_t MaestroPlugin::tunedPosition(int16_t positionValue, int16_t tuningValue
 	return (uint16_t)tunedValue;
 }
 
-void MaestroPlugin::maestroCommandLeg(uint8_t servo, uint8_t cmd, uint16_t value){
+void MaestroPlugin::maestroCommandServo(uint8_t servo, uint8_t cmd, uint16_t value){
 	Serial.write(cmd);
 	Serial.write(servo);
 	Serial.write(value & 0x7F);
 	Serial.write((value >> 7) & 0x7F);
 	Serial.read();
-}
-
-void MaestroPlugin::maestroCommandAllLegs(uint8_t offset, uint8_t cmd, uint16_t value){
-	uint8_t i;
-	for(i = 0; i < NUM_LEGS; i++){
-		maestroCommandLeg(i+offset,cmd,value);
-	}
 }
 
 uint8_t MaestroPlugin::maestroGetState(void){
@@ -153,7 +146,7 @@ void Maestro_pluginUpdate(void){
 
 		case SENDING_SEQUENCE:
 			sequencePosition = maestro.servoNum + (maestro.sequenceStep*NUM_SERVOS);
-			maestro.maestroCommandLeg(maestro.servoNum, MAESTRO_SET_TARGET, maestro.tunedPosition(maestro.servoSequence[sequencePosition],maestro.servoTuningValues[maestro.servoNum]));
+			maestro.maestroCommandServo(maestro.servoNum, MAESTRO_SET_TARGET, maestro.tunedPosition(maestro.servoSequence[sequencePosition],maestro.servoTuningValues[maestro.servoNum]));
 
 			if(++maestro.servoNum >= NUM_SERVOS){
 				maestro.servoNum = 0;

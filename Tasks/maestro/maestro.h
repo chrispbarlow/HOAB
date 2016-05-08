@@ -8,7 +8,6 @@
 #ifndef maestro_H_
 #define maestro_H_
 #include <Tasks.h>
-#include "../motionControl/motionControl.h"
 
 #define NUM_SERVOS					(12)
 
@@ -42,8 +41,7 @@ public:
 
 private:
 	uint16_t tunedPosition(int16_t positionValue, int16_t tuningValue);
-	void maestroCommandLeg(uint8_t servo, uint8_t cmd, uint16_t value);
-	void maestroCommandAllLegs(uint8_t offset, uint8_t cmd, uint16_t value);
+	void maestroCommandServo(uint8_t servo, uint8_t cmd, uint16_t value);
 	uint8_t maestroGetState(void);
 
 
