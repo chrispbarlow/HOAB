@@ -1,11 +1,11 @@
 /* Using Tasks for Arduino */
 #include <Tasks.h>
+#include <plugins/maestro/maestro.h>
 
 /* Tasks are in self-contained folders for cleanliness */
 #include "Tasks/Blink/Blink.h"
 #include "Tasks/motionControl/motionControl.h"
 #include "Tasks/proximitySensing/proximitySensing.h"
-#include "Tasks/maestro/maestro.h"
 
 /* Schedule configuration and initialisation */
 void setup(){
@@ -18,11 +18,9 @@ void setup(){
 
   proximitySensing_Init();
 	Schedule.addTask("IR sensors", proximitySensing_update, 1, 500);
-
-  maestro_Init();
-  Schedule.addTask("Servo update", maestro_update, 4, 100);
-  
+ 
   motionControl_Init();
+  Schedule.enablePlugin(maestro.pluginTask, 4, 10); 
 	Schedule.addTask("Motion control", motionControl_update, 3, 100);
 
   /* 1 ms ticks */

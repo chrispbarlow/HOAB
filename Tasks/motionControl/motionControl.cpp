@@ -3,10 +3,11 @@
  *      Author: chris.barlow
  */
 #include <arduino.h>
+#include <plugins/maestro/maestro.h>
+
 #include "motionControl.h"
 #include "controlScripts.h"
 
-#include "../maestro/maestro.h"
 #include "../proximitySensing/proximitySensing.h"
 
 
@@ -17,17 +18,33 @@ legPositions_t sequenceLegRun[NUM_LEGS];
 directions_t directionOffset_G;
 volatile movement_t movement_G;
 
+uint16_t speeds[NUM_SERVOS];
+uint16_t accels[NUM_SERVOS];
+int16_t servoTuning[NUM_SERVOS] = {0,0,0,0,0,0,0,0,0,0,0,0};
 
 void motionControl_Init(void){
+	int i;
 	movement_G = WALK;
 	directionOffset_G = DIR_A;
 
-	maestro_startNewSequence((void*)resetLegScript);
+	maestro.init();
+
+	for(i = 0; i < NUM_LEGS; i++){
+		speeds[HIP_SERVOS+i] = HIP_BASE_SPEED;
+		accels[HIP_SERVOS+i] = HIP_ACCELERATION;
+		speeds[KNEE_SERVOS+i] = KNEE_BASE_SPEED;
+		accels[KNEE_SERVOS+i] = KNEE_ACCELERATION;
+	}
+
+	maestro.setSpeeds(speeds);
+	maestro.setAccelerations(accels);
+	maestro.setServoTuning(servoTuning);
+	maestro.startNewSequence((int16_t*)resetLegScript, 7);
 }
 
 
 void motionControl_update(void){
-	int legNum, step, offsetLegNum, proximity;
+	int legNum, step, offsetLegNum, proximity, i;
 	uint16_t newWalkingSpeed;
 
 	proximity = proximity_getAverage();
@@ -36,22 +53,38 @@ void motionControl_update(void){
 	if(proximity <= OBJECT_TOO_CLOSE){
 		movement_G = WALK;
 		directionOffset_G = DIR_A;
+
 		newWalkingSpeed = (HIP_BASE_SPEED - (proximity*(HIP_BASE_SPEED/100)));
 		if(newWalkingSpeed <= 0){
 			newWalkingSpeed = 1;
 		}
-		maestro_setWalkingSpeed(newWalkingSpeed);
+
+		for(i = 0; i < 6; i++){
+			speeds[i] = newWalkingSpeed;
+		}
+		maestro.setSpeeds(speeds);
 	}
 	else if(proximity <= OBJECT_REALLY_CLOSE){
+		if(movement_G != STOP){
+			for(i = 0; i < 6; i++){
+				speeds[i] = HIP_BASE_SPEED;
+			}
+			maestro.setSpeeds(speeds);
+			maestro.startNewSequence((int16_t*)resetLegScript, 7);
+		}
 		movement_G = STOP;
 	}
 	else{
 		movement_G = WALK;
 		directionOffset_G = DIR_D;
-		maestro_setWalkingSpeed(HIP_BASE_SPEED);
+
+		for(i = 0; i < 6; i++){
+			speeds[i] = HIP_BASE_SPEED;
+		}
+		maestro.setSpeeds(speeds);
 	}
 
-	if(maestro_checkUpdateStatus() == SEQUENCE_FINISHED){
+	if(maestro.getUpdateStatus() == SEQUENCE_FINISHED){
 		switch(movement_G){
 		default:
 		case STOP:
@@ -77,19 +110,17 @@ void motionControl_update(void){
 				}
 			}
 
-			maestro_startNewSequence(sequenceLegRun);
+			maestro.startNewSequence((int16_t*)sequenceLegRun, NUM_SEQ_STEPS);
 			break;
 
 		case ROTATE_L:
-			maestro_startNewSequence((void*)rotateLeftScript);
+			maestro.startNewSequence((int16_t*)rotateLeftScript, NUM_SEQ_STEPS);
 			break;
 
 		case ROTATE_R:
-			maestro_startNewSequence((void*)rotateRightScript);
+			maestro.startNewSequence((int16_t*)rotateRightScript, NUM_SEQ_STEPS);
 			break;
 		}
 	}
 
 }
-
-

@@ -2,7 +2,7 @@
 #define CONTROLSCRIPTS_H
 
 /* Array of legs containing the movement sequence (direction A) */
-const legPositions_t resetLegScript[NUM_SEQ_STEPS] = {
+const legPositions_t resetLegScript[7] = {
         /* Step 0 */  {
         /* Hips */      {   0,    0,    0,    0,    0,    0},
         /* Knees */     {2000, 2000, 2000, 2000, 2000, 2000}
@@ -26,6 +26,10 @@ const legPositions_t resetLegScript[NUM_SEQ_STEPS] = {
         /* Step 5 */  {
         /* Hips */      {1495, 1495, 1495, 1495, 1495, 1495},
         /* Knees */     { 992, 2000,  992, 2000,  992, 2000}
+                },
+        /* Step 6 */  {
+        /* Hips */      {1495, 1495, 1495, 1495, 1495, 1495},
+        /* Knees */     {2000, 2000, 2000, 2000, 2000, 2000}
                 },
             };
 
