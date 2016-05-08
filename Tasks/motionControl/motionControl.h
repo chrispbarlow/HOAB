@@ -9,15 +9,15 @@
 #define motionControl_H_
 #include "../maestro/maestro.h"
 
-#define NUM_SEQ_STEPS 	(6)
-#define NUM_LEGS				(6)
+#define NUM_SEQ_STEPS 			(6)
+#define NUM_LEGS						(6)
 
-#define HIP_BASE_SPEED 	(400)
-#define KNEE_BASE_SPEED	(0)
-#define HIP_ACCELERATION 	(50)
-#define KNEE_ACCELERATION	(100)
-#define HIP_SERVOS			(0)
-#define KNEE_SERVOS 		(NUM_LEGS)
+#define HIP_BASE_SPEED 			(400)
+#define KNEE_BASE_SPEED			(0)
+#define HIP_ACCELERATION 		(50)
+#define KNEE_ACCELERATION		(100)
+#define HIP_SERVOS					(0)
+#define KNEE_SERVOS 				(NUM_LEGS)
 
 /* 6-step sequences for hips and knees */
 typedef struct {

@@ -19,7 +19,7 @@ volatile movement_t movement_G;
 
 uint16_t speeds[NUM_SERVOS];
 uint16_t accels[NUM_SERVOS];
-int16_t servoTuning[NUM_SERVOS] = {0,2,-2,5,-5,0,0,2,-2,5,-5,0};
+int16_t servoTuning[NUM_SERVOS] = {0,0,0,0,0,0,0,0,0,0,0,0};
 
 void motionControl_Init(void){
 	int i;
@@ -38,7 +38,7 @@ void motionControl_Init(void){
 	maestro.setSpeeds(speeds);
 	maestro.setAccelerations(accels);
 	maestro.setServoTuning(servoTuning);
-	maestro.startNewSequence((int16_t*)resetLegScript, NUM_SEQ_STEPS);
+	maestro.startNewSequence((int16_t*)resetLegScript, 7);
 }
 
 
@@ -52,6 +52,7 @@ void motionControl_update(void){
 	if(proximity <= OBJECT_TOO_CLOSE){
 		movement_G = WALK;
 		directionOffset_G = DIR_A;
+
 		newWalkingSpeed = (HIP_BASE_SPEED - (proximity*(HIP_BASE_SPEED/100)));
 		if(newWalkingSpeed <= 0){
 			newWalkingSpeed = 1;
@@ -63,6 +64,13 @@ void motionControl_update(void){
 		maestro.setSpeeds(speeds);
 	}
 	else if(proximity <= OBJECT_REALLY_CLOSE){
+		if(movement_G != STOP){
+			for(i = 0; i < 6; i++){
+				speeds[i] = HIP_BASE_SPEED;
+			}
+			maestro.setSpeeds(speeds);
+			maestro.startNewSequence((int16_t*)resetLegScript, 7);
+		}
 		movement_G = STOP;
 	}
 	else{
@@ -72,7 +80,6 @@ void motionControl_update(void){
 		for(i = 0; i < 6; i++){
 			speeds[i] = HIP_BASE_SPEED;
 		}
-
 		maestro.setSpeeds(speeds);
 	}
 
@@ -116,5 +123,3 @@ void motionControl_update(void){
 	}
 
 }
-
-

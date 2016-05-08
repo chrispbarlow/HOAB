@@ -40,16 +40,16 @@ servoControlSteps_t MaestroPlugin::getUpdateStatus(void){
 }
 
 void MaestroPlugin::startNewSequence(int16_t *sequence, uint16_t count){
-	if(maestroControlStep == SEQUENCE_FINISHED){
+	// if(maestroControlStep == SEQUENCE_FINISHED){
 		servoSequence = sequence;
 		stepCount = count;
 
 		sequenceStep = 0;
 		maestroControlStep = SENDING_SEQUENCE;
-	}
-	else{
-		/* TODO: sequence queueing? */
-	}
+	// }
+	// else{
+	// 	/* TODO: sequence queueing? */
+	// }
 }
 
 void MaestroPlugin::setSpeeds(uint16_t speeds[]){
