@@ -141,23 +141,24 @@ uint8_t MaestroPlugin::maestroGetState(void){
 	return state;
 }
 
-void MaestroPlugin::pluginUpdate(void){
+void Maestro_pluginUpdate(void){
 	int sequencePosition = 0;
 	uint8_t state;
 
-	switch(maestroControlStep){
+	switch(maestro.maestroControlStep){
 		default:
 		case SEQUENCE_FINISHED:
 			/* Do nothing, wait for new sequence */
 			break;
 
 		case SENDING_SEQUENCE:
-			sequencePosition = servoNum + (sequenceStep*NUM_SERVOS);
-			maestroCommandLeg(servoNum, MAESTRO_SET_TARGET, tunedPosition(servoSequence[sequencePosition],servoTuningValues[servoNum]));
+			sequencePosition = maestro.servoNum + (maestro.sequenceStep*NUM_SERVOS);
+			maestro.maestroCommandLeg(maestro.servoNum, MAESTRO_SET_TARGET, maestro.tunedPosition(maestro.servoSequence[sequencePosition],maestro.servoTuningValues[maestro.servoNum]));
 
-			if(++servoNum >= NUM_SERVOS){
-				maestroControlStep = WAIT_FOR_STOP;
-				servoNum = 0;
+			if(++maestro.servoNum >= NUM_SERVOS){
+				maestro.servoNum = 0;
+				maestro.sequenceStep++;
+				maestro.maestroControlStep = WAIT_FOR_STOP;
 			}
 			break;
 
@@ -167,15 +168,15 @@ void MaestroPlugin::pluginUpdate(void){
 #warning "test mode won't wait for servos to stop"
 			state = 0;
 #else
-			state = maestroGetState();
+			state = maestro.maestroGetState();
 #endif
 
-			if((state == 0x00) && (++sequenceStep >= stepCount)){
-				sequenceStep = 0;
-				maestroControlStep = SEQUENCE_FINISHED;
+			if((state == 0x00) && (maestro.sequenceStep >= maestro.stepCount)){
+				maestro.sequenceStep = 0;
+				maestro.maestroControlStep = SEQUENCE_FINISHED;
 			}
 			else if(state == 0x00){
-				maestroControlStep = SENDING_SEQUENCE;
+				maestro.maestroControlStep = SENDING_SEQUENCE;
 			}
 
 			break;
