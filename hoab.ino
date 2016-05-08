@@ -1,11 +1,11 @@
 /* Using Tasks for Arduino */
 #include <Tasks.h>
+#include <plugins/maestro/maestro.h>
 
 /* Tasks are in self-contained folders for cleanliness */
 #include "Tasks/Blink/Blink.h"
 #include "Tasks/motionControl/motionControl.h"
 #include "Tasks/proximitySensing/proximitySensing.h"
-#include "Tasks/maestro/maestro.h"
 
 /* Schedule configuration and initialisation */
 void setup(){

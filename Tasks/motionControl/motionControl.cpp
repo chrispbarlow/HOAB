@@ -3,10 +3,11 @@
  *      Author: chris.barlow
  */
 #include <arduino.h>
+#include <plugins/maestro/maestro.h>
+
 #include "motionControl.h"
 #include "controlScripts.h"
 
-#include "../maestro/maestro.h"
 #include "../proximitySensing/proximitySensing.h"
 
 
