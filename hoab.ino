@@ -9,10 +9,11 @@
 
 /* Schedule configuration and initialisation */
 void setup(){
+  /* Remember to include plugins in the number of tasks */
   Schedule.begin(4);
   
 	Serial.begin(115200);
-  
+
   blink_Init();
 	Schedule.addTask("blink", blink_update, 0, 10);
 
