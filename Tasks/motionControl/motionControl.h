@@ -7,7 +7,7 @@
 
 #ifndef motionControl_H_
 #define motionControl_H_
-#include "../maestro/maestro.h"
+#include <plugins/maestro.h>
 
 #define NUM_SEQ_STEPS 			(6)
 #define NUM_LEGS						(6)

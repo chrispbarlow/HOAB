@@ -3,7 +3,7 @@
  *      Author: chris.barlow
  */
 #include <arduino.h>
-#include <plugins/maestro/maestro.h>
+#include <plugins/maestro.h>
 
 #include "motionControl.h"
 #include "controlScripts.h"

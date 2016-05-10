@@ -1,6 +1,6 @@
 /* Using Tasks for Arduino */
 #include <Tasks.h>
-#include <plugins/maestro/maestro.h>
+#include <plugins/maestro.h>
 
 /* Tasks are in self-contained folders for cleanliness */
 #include "Tasks/Blink/Blink.h"
