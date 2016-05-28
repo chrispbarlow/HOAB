@@ -46,8 +46,10 @@ void motionControl_Init(void){
 void motionControl_update(void){
 	int legNum, step, offsetLegNum, proximity, i;
 	uint16_t newWalkingSpeed;
+	servoControlSteps_t maestroStatus;
 
 	proximity = proximity_getAverage();
+	maestroStatus = maestro.getUpdateStatus();
 
 	/* Simple speed control - calculate forwards speed based on proximity, stop if too close and reverse if really close */
 	if(proximity <= OBJECT_TOO_CLOSE){
@@ -66,6 +68,7 @@ void motionControl_update(void){
 	}
 	else if(proximity <= OBJECT_REALLY_CLOSE){
 		if(movement_G != STOP){
+		// if((movement_G != STOP)&&(maestroStatus == SEQUENCE_FINISHED)){
 			for(i = 0; i < 6; i++){
 				speeds[i] = HIP_BASE_SPEED;
 			}
