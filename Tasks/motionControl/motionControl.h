@@ -7,17 +7,20 @@
 
 #ifndef motionControl_H_
 #define motionControl_H_
-// #include <plugins/maestro.h>
 
-#define NUM_SEQ_STEPS 			(6)
-#define NUM_LEGS						(6)
+#define NUM_LEGS							(6)
+#define NUM_SEQ_STEPS 				(10)
 
-#define HIP_BASE_SPEED 			(400)
-#define KNEE_BASE_SPEED			(0)
-#define HIP_ACCELERATION 		(50)
-#define KNEE_ACCELERATION		(100)
-#define HIP_SERVOS					(0)
-#define KNEE_SERVOS 				(NUM_LEGS)
+#define HIP_BASE_SPEED 				(400)
+#define KNEE_BASE_SPEED				(0)
+#define HIP_ACCELERATION 			(50)
+#define KNEE_ACCELERATION			(100)
+#define HIP_SERVOS						(0)
+#define KNEE_SERVOS 					(NUM_LEGS)
+
+#define OBJECT_TOO_CLOSE      (100)
+#define OBJECT_REALLY_CLOSE	  (250)
+#define STOP_DISTANCE					(50) /* Hysteresis */
 
 /* 6-step sequences for hips and knees */
 typedef struct {
@@ -30,7 +33,5 @@ typedef enum{STOP, WALK, ROTATE_L, ROTATE_R, RESET}movement_t;
 
 void motionControl_Init(void);
 void motionControl_update(void);
-
-// extern MaestroPlugin maestro;
 
 #endif /* motionControl_H_ */

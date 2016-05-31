@@ -13,6 +13,7 @@ void setup(){
   Schedule.begin(4);
   
 	Serial.begin(115200);
+  Serial.println("Start");
 
   blink_Init();
 	Schedule.addTask("blink", blink_update, 0, 10);
@@ -21,7 +22,7 @@ void setup(){
 	Schedule.addTask("IR sensors", proximitySensing_update, 1, 500);
  
   motionControl_Init();
-  Schedule.enablePlugin(maestro.pluginTask, 4, 10); 
+  Schedule.enablePlugin(maestro.pluginTask, 5, 10); 
 	Schedule.addTask("Motion control", motionControl_update, 3, 100);
 
   /* 1 ms ticks */

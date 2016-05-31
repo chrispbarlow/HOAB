@@ -25,9 +25,12 @@ void proximitySensing_update(void){
 
 #ifdef DEBUG_SENSORS
 #warning "Don't debug sensors on the live robot"
+	Serial.print("\n");
 	Serial.print(proxReadings.left);
 	Serial.print(",");
 	Serial.print(proxReadings.right);
+	Serial.print(",");
+  Serial.println(proximity_getAverage());
 #endif
 }
 
