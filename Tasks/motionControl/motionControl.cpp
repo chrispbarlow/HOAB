@@ -42,6 +42,16 @@ void motionControl_Init(void){
 	movement_G = STOP;
 }
 
+uint16_t speedFromProximity(uint16_t dist){
+	uint16_t newSpeed;
+
+	newSpeed = (HIP_BASE_SPEED - (dist*(HIP_BASE_SPEED/100)));
+	if(newSpeed <= 0){
+		newSpeed = 1;
+	}
+
+	return newSpeed;
+}
 
 void motionControl_update(void){
 	int legNum, step, offsetLegNum, proximity, i;
@@ -58,30 +68,25 @@ void motionControl_update(void){
 		break;
 
 	case STOP:
-	// Serial.print("S");
 		if((maestroStatus == SEQUENCE_FINISHED) && ((proximity < OBJECT_TOO_CLOSE-STOP_DISTANCE)||(proximity > OBJECT_REALLY_CLOSE+STOP_DISTANCE))){
 			movement_G = WALK;
 		}
 		break;
 
 	case WALK:
-	// Serial.print("W");
 		/* Simple speed control - calculate forwards speed based on proximity, stop if too close and reverse if really close */
 		if(proximity <= OBJECT_TOO_CLOSE){
 			directionOffset_G = DIR_A;
 
-			newWalkingSpeed = (HIP_BASE_SPEED - (proximity*(HIP_BASE_SPEED/100)));
-			if(newWalkingSpeed <= 0){
-				newWalkingSpeed = 1;
-			}
+			newWalkingSpeed = speedFromProximity(proximity);
 
-			for(i = 0; i < 6; i++){
+			for(i = 0; i < NUM_LEGS; i++){
 				speeds[i] = newWalkingSpeed;
 			}
 			maestro.setSpeeds(speeds);
 		}
 		else if(proximity <= OBJECT_REALLY_CLOSE){
-				for(i = 0; i < 6; i++){
+				for(i = 0; i < NUM_LEGS; i++){
 					speeds[i] = HIP_BASE_SPEED;
 				}
 				maestro.setSpeeds(speeds);
@@ -91,7 +96,7 @@ void motionControl_update(void){
 		else{
 			directionOffset_G = DIR_D;
 
-			for(i = 0; i < 6; i++){
+			for(i = 0; i < NUM_LEGS; i++){
 				speeds[i] = HIP_BASE_SPEED;
 			}
 			maestro.setSpeeds(speeds);
